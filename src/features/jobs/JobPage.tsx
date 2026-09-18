@@ -6,6 +6,7 @@ import {
   obterJob,
   removerData,
   tirarDoQuadro,
+  excluirJob,
 } from "../../data/jobs";
 import { listarClientes } from "../../data/clientes";
 import { listarCompromissosDoJob, removerCompromisso } from "../../data/agenda";
@@ -55,6 +56,8 @@ export function JobPage() {
   const [blocos, setBlocos] = useState<CompromissoCompleto[]>([]);
   const [reservando, setReservando] = useState(false);
   const [parcelas, setParcelas] = useState<Parcela[]>([]);
+  const [excluindo, setExcluindo] = useState(false);
+  const [apagando, setApagando] = useState(false);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
   const [editando, setEditando] = useState(false);
@@ -134,6 +137,39 @@ export function JobPage() {
       setParcelas((atual) => [...atual, nova]);
     } catch (falha) {
       setErro((falha as Error).message);
+    }
+  }
+
+  const parcelasPagas = parcelas.filter((p) => p.confianca === "paga");
+  const totalPago = parcelasPagas.reduce((t, p) => t + Number(p.valor), 0);
+
+  /** O que o banco leva junto por cascata. Mostrar a conta evita surpresa. */
+  const aSeremApagados = [
+    job && job.datas.length > 0
+      ? `${job.datas.length} ${job.datas.length === 1 ? "diária" : "diárias"} de captação`
+      : null,
+    comentarios.length > 0
+      ? `${comentarios.length} ${comentarios.length === 1 ? "comentário" : "comentários"}`
+      : null,
+    links.length > 0 ? `${links.length} ${links.length === 1 ? "link" : "links"}` : null,
+    blocos.length > 0
+      ? `${blocos.length} ${blocos.length === 1 ? "bloco de edição" : "blocos de edição"} na agenda`
+      : null,
+    parcelas.length > 0
+      ? `${parcelas.length} ${parcelas.length === 1 ? "parcela" : "parcelas"}`
+      : null,
+  ].filter(Boolean) as string[];
+
+  async function apagarJob() {
+    if (!job) return;
+    setApagando(true);
+    try {
+      await excluirJob(job.id);
+      navegar("/quadro");
+    } catch (falha) {
+      setErro((falha as Error).message);
+      setApagando(false);
+      setExcluindo(false);
     }
   }
 
@@ -590,6 +626,65 @@ export function JobPage() {
           </Painel>
         </div>
       </div>
+
+      <footer className="zona-de-risco">
+        <div>
+          <h3>Excluir este job</h3>
+          <p>
+            Para quando o job nunca deveria ter existido — um teste, ou um erro de digitação.
+            Some do sistema inteiro e não aparece em relatório nenhum. Se o trabalho existiu de
+            verdade e caiu, use <strong>perdido</strong> ou <strong>cancelado</strong>: esses
+            saem do quadro mas continuam contando.
+          </p>
+        </div>
+        <Botao variante="perigo" onClick={() => setExcluindo(true)}>
+          Excluir permanentemente
+        </Botao>
+      </footer>
+
+      <Modal
+        aberto={excluindo}
+        titulo="Excluir permanentemente"
+        aoFechar={() => setExcluindo(false)}
+        rodape={
+          <>
+            <Botao onClick={() => setExcluindo(false)} disabled={apagando}>
+              Cancelar
+            </Botao>
+            <Botao variante="perigo" onClick={() => void apagarJob()} disabled={apagando}>
+              {apagando ? "Excluindo…" : "Excluir para sempre"}
+            </Botao>
+          </>
+        }
+      >
+        <p style={{ fontSize: "var(--texto-md)", marginBottom: "var(--esp-3)" }}>
+          <strong>{job.titulo}</strong> será apagado do banco. Não há como desfazer, e ele não
+          vai para relatório nenhum — é como se nunca tivesse existido.
+        </p>
+
+        {aSeremApagados.length > 0 && (
+          <>
+            <p className="rotulo" style={{ marginBottom: "var(--esp-2)" }}>
+              Vai junto
+            </p>
+            <ul className="risco__lista">
+              {aSeremApagados.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+          </>
+        )}
+
+        {parcelasPagas.length > 0 && (
+          <div style={{ marginTop: "var(--esp-3)" }}>
+            <Aviso tom="erro">
+              Atenção: {parcelasPagas.length === 1 ? "uma parcela já paga" : `${parcelasPagas.length} parcelas já pagas`}
+              , somando {moeda(totalPago)}, {parcelasPagas.length === 1 ? "será apagada" : "serão apagadas"} junto.
+              Esse dinheiro sai do seu faturamento e você perde o registro de que recebeu.
+            </Aviso>
+          </div>
+        )}
+      </Modal>
 
       <ModalJob
         aberto={editando}

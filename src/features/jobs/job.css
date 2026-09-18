@@ -84,3 +84,41 @@
   font-variant-numeric: tabular-nums;
   font-weight: 500;
 }
+
+/* Zona de risco: ação destrutiva fica longe das comuns, e explicada. */
+.zona-de-risco {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--esp-4);
+  margin-top: var(--esp-7);
+  padding: var(--esp-4);
+  border: 1px dashed var(--cor-perigo);
+  border-radius: var(--raio-lg);
+  background: var(--cor-perigo-lavado);
+}
+
+.zona-de-risco h3 {
+  font-size: var(--texto-md);
+  color: var(--cor-perigo);
+  margin-bottom: 4px;
+}
+
+.zona-de-risco p {
+  font-size: var(--texto-sm);
+  color: var(--cor-texto-medio);
+  max-width: 64ch;
+  line-height: 1.55;
+}
+
+.risco__lista {
+  margin: 0;
+  padding-left: 20px;
+  font-size: var(--texto-md);
+  color: var(--cor-texto-medio);
+}
+
+.risco__lista li {
+  margin-bottom: 3px;
+}
