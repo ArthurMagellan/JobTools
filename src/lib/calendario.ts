@@ -92,3 +92,19 @@ export function proximosDias(dataISO: string, n: number): string[] {
 export function primeiroEUltimo(dias: string[]): [string, string] {
   return [dias[0], dias[dias.length - 1]];
 }
+
+/**
+ * Primeiro e último dia de uma competência ("2026-09").
+ *
+ * Existe porque montar o fim do mês como "-31" quebra em setembro, abril, junho,
+ * novembro e fevereiro — o Postgres recusa a data e a tela inteira cai.
+ */
+export function inicioDoMes(competencia: string): string {
+  return `${competencia}-01`;
+}
+
+export function fimDoMes(competencia: string): string {
+  const [ano, mes] = competencia.split("-").map(Number);
+  const ultimo = new Date(ano, mes, 0).getDate(); // dia 0 do mês seguinte = último deste
+  return `${competencia}-${String(ultimo).padStart(2, "0")}`;
+}

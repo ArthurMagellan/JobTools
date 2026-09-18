@@ -18,6 +18,7 @@ import {
   type ParcelaCompleta,
 } from "../../data/types";
 import { dataCurta, hojeISO, moeda } from "../../lib/formato";
+import { fimDoMes, inicioDoMes } from "../../lib/calendario";
 import { Aviso, Botao, Carregando, Etiqueta, Indicador, Painel } from "../../components/ui";
 import { ModalContrato } from "./ModalContrato";
 import { ModalParcela } from "./ModalParcela";
@@ -56,7 +57,7 @@ export function FinanceiroPage() {
       setGeradas(criadas);
 
       const [ps, abertas, cs] = await Promise.all([
-        listarParcelas(`${mes}-01`, `${mes}-31`),
+        listarParcelas(inicioDoMes(mes), fimDoMes(mes)),
         listarParcelasEmAberto(),
         listarContratos(),
       ]);
