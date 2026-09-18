@@ -1,0 +1,288 @@
+/* Componentes de interface. Existem uma vez e são reusados em todo lugar —
+   é o que permite trocar a identidade visual depois mexendo só aqui e nos tokens. */
+
+/* --- botão --- */
+.botao {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--esp-2);
+  padding: 8px 14px;
+  border-radius: var(--raio-md);
+  border: 1px solid var(--cor-linha);
+  background: var(--cor-superficie);
+  color: var(--cor-texto);
+  font-size: var(--texto-md);
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.12s, border-color 0.12s;
+  white-space: nowrap;
+}
+.botao:hover:not(:disabled) {
+  background: var(--cor-afundado);
+}
+.botao:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+.botao--principal {
+  background: var(--cor-acento);
+  border-color: var(--cor-acento);
+  color: var(--cor-acento-contraste);
+}
+.botao--principal:hover:not(:disabled) {
+  background: var(--cor-acento-forte);
+  border-color: var(--cor-acento-forte);
+}
+.botao--perigo {
+  color: var(--cor-perigo);
+  border-color: var(--cor-perigo);
+  background: transparent;
+}
+.botao--perigo:hover:not(:disabled) {
+  background: var(--cor-perigo-lavado);
+}
+.botao--discreto {
+  border-color: transparent;
+  background: transparent;
+  color: var(--cor-texto-suave);
+}
+.botao--discreto:hover:not(:disabled) {
+  background: var(--cor-afundado);
+  color: var(--cor-texto);
+}
+.botao--pequeno {
+  padding: 4px 9px;
+  font-size: var(--texto-sm);
+}
+
+/* --- campos --- */
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-1);
+  min-width: 0;
+}
+.campo__rotulo {
+  font-family: var(--fonte-mono);
+  font-size: var(--texto-xs);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--cor-texto-suave);
+}
+.campo__opcional {
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 10.5px;
+  opacity: 0.75;
+}
+.campo__entrada,
+.campo__area,
+.campo__selecao {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: var(--raio-md);
+  border: 1px solid var(--cor-linha);
+  background: var(--cor-superficie);
+  font-size: var(--texto-md);
+}
+.campo__area {
+  resize: vertical;
+  min-height: 74px;
+  line-height: 1.5;
+}
+.campo__entrada:focus,
+.campo__area:focus,
+.campo__selecao:focus {
+  border-color: var(--cor-acento);
+}
+.campo__dica {
+  font-size: var(--texto-xs);
+  color: var(--cor-texto-suave);
+}
+.campo__erro {
+  font-size: var(--texto-xs);
+  color: var(--cor-perigo);
+}
+
+/* --- marcação (checkbox) --- */
+.marcacao {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--esp-2);
+  font-size: var(--texto-md);
+  cursor: pointer;
+  user-select: none;
+}
+.marcacao input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--cor-acento);
+  cursor: pointer;
+}
+
+/* --- etiqueta --- */
+.etiqueta {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 7px;
+  border-radius: var(--raio-sm);
+  border: 1px solid var(--cor-linha);
+  background: var(--cor-afundado);
+  color: var(--cor-texto-medio);
+  font-family: var(--fonte-mono);
+  font-size: var(--texto-xs);
+  white-space: nowrap;
+}
+.etiqueta--acento {
+  background: var(--cor-acento-lavado);
+  border-color: var(--cor-acento);
+  color: var(--cor-acento-forte);
+}
+.etiqueta--ok {
+  background: var(--cor-ok-lavado);
+  border-color: var(--cor-ok);
+  color: var(--cor-ok);
+}
+.etiqueta--atencao {
+  background: var(--cor-atencao-lavado);
+  border-color: var(--cor-atencao);
+  color: var(--cor-atencao);
+}
+.etiqueta--perigo {
+  background: var(--cor-perigo-lavado);
+  border-color: var(--cor-perigo);
+  color: var(--cor-perigo);
+}
+.etiqueta--macio {
+  background: var(--cor-macio-lavado);
+  border: 1px dashed var(--cor-macio);
+  color: var(--cor-macio);
+}
+
+/* --- aviso --- */
+.aviso {
+  display: flex;
+  gap: var(--esp-2);
+  padding: 10px 12px;
+  border-radius: var(--raio-md);
+  border: 1px solid var(--cor-linha);
+  background: var(--cor-afundado);
+  font-size: var(--texto-md);
+  color: var(--cor-texto-medio);
+}
+.aviso--erro {
+  background: var(--cor-perigo-lavado);
+  border-color: var(--cor-perigo);
+  color: var(--cor-perigo);
+}
+.aviso--atencao {
+  background: var(--cor-atencao-lavado);
+  border-color: var(--cor-atencao);
+  color: var(--cor-atencao);
+}
+
+/* --- painel --- */
+.painel {
+  background: var(--cor-superficie);
+  border: 1px solid var(--cor-linha);
+  border-radius: var(--raio-lg);
+  box-shadow: var(--sombra-sm);
+}
+.painel__cabeca {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--esp-3);
+  padding: var(--esp-3) var(--esp-4);
+  border-bottom: 1px solid var(--cor-linha-suave);
+}
+.painel__corpo {
+  padding: var(--esp-4);
+}
+
+/* --- modal --- */
+.modal__fundo {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 18, 17, 0.45);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: var(--esp-4);
+  overflow-y: auto;
+  z-index: 50;
+}
+.modal {
+  background: var(--cor-superficie);
+  border: 1px solid var(--cor-linha);
+  border-radius: var(--raio-lg);
+  box-shadow: var(--sombra-lg);
+  width: 100%;
+  max-width: 560px;
+  margin: auto;
+}
+.modal--largo {
+  max-width: 760px;
+}
+.modal__cabeca {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--esp-3);
+  padding: var(--esp-4);
+  border-bottom: 1px solid var(--cor-linha-suave);
+}
+.modal__corpo {
+  padding: var(--esp-4);
+}
+.modal__rodape {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--esp-2);
+  padding: var(--esp-3) var(--esp-4);
+  border-top: 1px solid var(--cor-linha-suave);
+}
+
+/* --- carregando --- */
+.girando {
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--cor-linha);
+  border-top-color: var(--cor-acento);
+  border-radius: 50%;
+  animation: girar 0.7s linear infinite;
+}
+@keyframes girar {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.carregando {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--esp-2);
+  padding: var(--esp-6);
+  color: var(--cor-texto-suave);
+  font-size: var(--texto-md);
+}
+
+/* --- grade de formulário --- */
+.grade {
+  display: grid;
+  gap: var(--esp-3);
+  grid-template-columns: 1fr;
+}
+@media (min-width: 620px) {
+  .grade--2 {
+    grid-template-columns: 1fr 1fr;
+  }
+  .grade--3 {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+  .grade__largo {
+    grid-column: 1 / -1;
+  }
+}

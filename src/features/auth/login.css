@@ -1,0 +1,50 @@
+.login {
+  min-height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--esp-4);
+  background: var(--cor-fundo);
+}
+
+.login__caixa {
+  width: 100%;
+  max-width: 340px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-3);
+  background: var(--cor-superficie);
+  border: 1px solid var(--cor-linha);
+  border-radius: var(--raio-lg);
+  box-shadow: var(--sombra-md);
+  padding: var(--esp-6) var(--esp-5);
+}
+
+.login__marca {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-2);
+}
+
+.login__logo {
+  color: var(--cor-acento);
+  font-size: 26px;
+  line-height: 1;
+}
+
+.login__marca h1 {
+  font-size: var(--texto-xl);
+  font-weight: 700;
+}
+
+.login__linha {
+  color: var(--cor-texto-suave);
+  font-size: var(--texto-md);
+  margin-bottom: var(--esp-2);
+}
+
+.login__botao {
+  margin-top: var(--esp-2);
+  width: 100%;
+  padding: 10px;
+}

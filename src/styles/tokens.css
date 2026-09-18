@@ -1,0 +1,133 @@
+/* ============================================================================
+   JobTools — tokens de design
+   ----------------------------------------------------------------------------
+   Este é o ÚNICO arquivo onde cor, espaçamento, tipografia e raio são definidos.
+   Nenhum componente escreve um hex ou um pixel solto. Trocar a identidade visual
+   do sistema inteiro, um dia, é trocar os valores daqui.
+   ============================================================================ */
+
+:root {
+  /* --- neutros: cinza com viés frio, escolhido e não herdado --- */
+  --cor-fundo: #f4f6f6;
+  --cor-superficie: #ffffff;
+  --cor-afundado: #ebefef;
+  --cor-texto: #141e1d;
+  --cor-texto-medio: #41514f;
+  --cor-texto-suave: #6b7c7a;
+  --cor-linha: #d8e0df;
+  --cor-linha-suave: #e5ebea;
+
+  /* --- acento: petróleo --- */
+  --cor-acento: #0b6e68;
+  --cor-acento-forte: #075450;
+  --cor-acento-lavado: #e0eeec;
+  --cor-acento-contraste: #ffffff;
+
+  /* --- semânticas: separadas do acento, usadas só para estado --- */
+  --cor-ok: #3a7d44;
+  --cor-ok-lavado: #e5f0e6;
+  --cor-atencao: #9a6b14;
+  --cor-atencao-lavado: #f5ebd9;
+  --cor-perigo: #ae3d2c;
+  --cor-perigo-lavado: #f6e5e1;
+
+  /* --- compromisso macio: dessaturado de propósito (regra R2) --- */
+  --cor-macio: #6f7e8c;
+  --cor-macio-lavado: #e8ecef;
+
+  /* --- tipografia --- */
+  --fonte-titulo: "Familjen Grotesk", "Segoe UI", system-ui, sans-serif;
+  --fonte-texto: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --fonte-mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+
+  --texto-xs: 11px;
+  --texto-sm: 12.5px;
+  --texto-md: 14px;
+  --texto-base: 15px;
+  --texto-lg: 18px;
+  --texto-xl: 24px;
+  --texto-2xl: 32px;
+
+  /* --- espaçamento --- */
+  --esp-1: 4px;
+  --esp-2: 8px;
+  --esp-3: 12px;
+  --esp-4: 16px;
+  --esp-5: 24px;
+  --esp-6: 32px;
+  --esp-7: 48px;
+
+  /* --- forma --- */
+  --raio-sm: 3px;
+  --raio-md: 5px;
+  --raio-lg: 8px;
+  --sombra-sm: 0 1px 2px rgba(20, 30, 29, 0.06);
+  --sombra-md: 0 2px 8px rgba(20, 30, 29, 0.1);
+  --sombra-lg: 0 8px 28px rgba(20, 30, 29, 0.16);
+
+  /* --- layout --- */
+  --largura-menu: 210px;
+  --altura-menu-celular: 58px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-tema="claro"]) {
+    --cor-fundo: #0f1817;
+    --cor-superficie: #15201f;
+    --cor-afundado: #1b2726;
+    --cor-texto: #e7edec;
+    --cor-texto-medio: #b3c1bf;
+    --cor-texto-suave: #879796;
+    --cor-linha: #2a3735;
+    --cor-linha-suave: #223330;
+
+    --cor-acento: #59b6ad;
+    --cor-acento-forte: #7ecbc3;
+    --cor-acento-lavado: #123331;
+    --cor-acento-contraste: #0f1817;
+
+    --cor-ok: #6fb97a;
+    --cor-ok-lavado: #162e1c;
+    --cor-atencao: #d2a455;
+    --cor-atencao-lavado: #33270f;
+    --cor-perigo: #e0745f;
+    --cor-perigo-lavado: #35201b;
+
+    --cor-macio: #93a3b1;
+    --cor-macio-lavado: #1e2a31;
+
+    --sombra-sm: 0 1px 2px rgba(0, 0, 0, 0.32);
+    --sombra-md: 0 2px 8px rgba(0, 0, 0, 0.4);
+    --sombra-lg: 0 8px 28px rgba(0, 0, 0, 0.5);
+  }
+}
+
+:root[data-tema="escuro"] {
+  --cor-fundo: #0f1817;
+  --cor-superficie: #15201f;
+  --cor-afundado: #1b2726;
+  --cor-texto: #e7edec;
+  --cor-texto-medio: #b3c1bf;
+  --cor-texto-suave: #879796;
+  --cor-linha: #2a3735;
+  --cor-linha-suave: #223330;
+
+  --cor-acento: #59b6ad;
+  --cor-acento-forte: #7ecbc3;
+  --cor-acento-lavado: #123331;
+  --cor-acento-contraste: #0f1817;
+
+  --cor-ok: #6fb97a;
+  --cor-ok-lavado: #162e1c;
+  --cor-atencao: #d2a455;
+  --cor-atencao-lavado: #33270f;
+  --cor-perigo: #e0745f;
+  --cor-perigo-lavado: #35201b;
+
+  --cor-macio: #93a3b1;
+  --cor-macio-lavado: #1e2a31;
+
+  --sombra-sm: 0 1px 2px rgba(0, 0, 0, 0.32);
+  --sombra-md: 0 2px 8px rgba(0, 0, 0, 0.4);
+  --sombra-lg: 0 8px 28px rgba(0, 0, 0, 0.5);
+}
