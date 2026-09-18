@@ -33,7 +33,7 @@ import {
   type Cliente,
   type Comentario,
   type CompromissoCompleto,
-  type Parcela,
+  type ParcelaCompleta,
   type JobCompleto,
   type Link as LinkArquivo,
   type Status,
@@ -43,6 +43,7 @@ import { dataCompleta, hojeISO, horaCurta, moeda, quandoRelativo } from "../../l
 import { Area, Aviso, Botao, Campo, Carregando, Etiqueta, Modal, Painel, Selecao } from "../../components/ui";
 import { ModalJob } from "./JobForm";
 import { ModalCompromisso } from "../calendario/ModalCompromisso";
+import { ModalParcela } from "../financeiro/ModalParcela";
 import "./job.css";
 
 export function JobPage() {
@@ -55,7 +56,8 @@ export function JobPage() {
   const [links, setLinks] = useState<LinkArquivo[]>([]);
   const [blocos, setBlocos] = useState<CompromissoCompleto[]>([]);
   const [reservando, setReservando] = useState(false);
-  const [parcelas, setParcelas] = useState<Parcela[]>([]);
+  const [parcelas, setParcelas] = useState<ParcelaCompleta[]>([]);
+  const [parcelaAberta, setParcelaAberta] = useState<ParcelaCompleta | null>(null);
   const [excluindo, setExcluindo] = useState(false);
   const [apagando, setApagando] = useState(false);
   const [carregando, setCarregando] = useState(true);
@@ -128,13 +130,15 @@ export function JobPage() {
     if (!job) return;
     const restante = Number(job.valor_fechado ?? 0) - somaParcelas;
     try {
-      const nova = await criarParcela({
+      await criarParcela({
         job_id: job.id,
         valor: restante > 0 ? restante : 0,
         data_prevista: previsaoPeloPrazo(clienteCompleto?.prazo_pagamento_dias ?? null),
         confianca: "estimada",
       });
-      setParcelas((atual) => [...atual, nova]);
+      // Recarrega em vez de anexar: a lista precisa do cliente junto, que só a
+      // consulta completa traz.
+      await recarregar();
     } catch (falha) {
       setErro((falha as Error).message);
     }
@@ -462,6 +466,13 @@ export function JobPage() {
                       </Botao>
                     )}
                     <Botao
+                      pequeno
+                      onClick={() => setParcelaAberta(p)}
+                      title="Nota fiscal, data confirmada de pagamento, forma e nota"
+                    >
+                      Editar
+                    </Botao>
+                    <Botao
                       variante="discreto"
                       pequeno
                       onClick={() => {
@@ -692,6 +703,13 @@ export function JobPage() {
         clientes={clientes}
         aoFechar={() => setEditando(false)}
         aoCriarCliente={(c) => setClientes((atual) => [...atual, c])}
+        aoSalvar={() => void recarregar()}
+      />
+
+      <ModalParcela
+        aberto={parcelaAberta !== null}
+        parcela={parcelaAberta}
+        aoFechar={() => setParcelaAberta(null)}
         aoSalvar={() => void recarregar()}
       />
 

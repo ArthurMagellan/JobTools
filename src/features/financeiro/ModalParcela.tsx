@@ -161,10 +161,17 @@ export function ModalParcela({
         />
 
         <Campo
-          rotulo="Vencimento previsto"
+          rotulo={r.confianca === "confirmada" ? "Data confirmada do pagamento" : "Vencimento previsto"}
           type="date"
           value={r.data_prevista}
           onChange={(e) => mudar("data_prevista", e.target.value)}
+          dica={
+            r.confianca === "estimada"
+              ? "Ainda é palpite. Quando o financeiro do cliente mandar a data, ponha aqui e marque como confirmada."
+              : r.confianca === "confirmada"
+                ? "O dia exato que o cliente informou."
+                : undefined
+          }
         />
 
         <Selecao

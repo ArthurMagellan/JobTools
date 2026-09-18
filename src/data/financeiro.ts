@@ -71,10 +71,14 @@ export async function listarParcelas(de: string, ate: string): Promise<ParcelaCo
   return data ?? [];
 }
 
-export async function listarParcelasDoJob(jobId: string): Promise<Parcela[]> {
+/**
+ * Traz o cliente junto: é o prazo de pagamento dele que recalcula o vencimento
+ * quando você informa a data de emissão da nota.
+ */
+export async function listarParcelasDoJob(jobId: string): Promise<ParcelaCompleta[]> {
   const { data, error } = await supabase
     .from("parcelas")
-    .select("*")
+    .select(SELECT_PARCELA)
     .eq("job_id", jobId)
     .order("data_prevista");
 
