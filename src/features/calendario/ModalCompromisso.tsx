@@ -94,8 +94,8 @@ export function ModalCompromisso({
     if (!aberto || !r.data_inicio) return;
     let vivo = true;
     void eventosDoPeriodo(r.data_inicio, r.data_fim || r.data_inicio)
-      .then((es) => {
-        if (vivo) setDoDia(es.filter((e) => e.compromissoId !== compromisso?.id));
+      .then((agenda) => {
+        if (vivo) setDoDia(agenda.eventos.filter((e) => e.compromissoId !== compromisso?.id));
       })
       .catch(() => undefined);
     return () => {

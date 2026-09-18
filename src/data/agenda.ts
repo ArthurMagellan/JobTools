@@ -101,11 +101,17 @@ function horaDoCompromisso(c: Compromisso): string | null {
   return fim ? `${inicio}–${fim}` : inicio;
 }
 
+export interface AgendaDoPeriodo {
+  eventos: EventoAgenda[];
+  /** A camada de pagamento não pôde ser lida — o resto do calendário continua válido. */
+  vencimentosIndisponiveis: boolean;
+}
+
 /**
  * Junta as quatro camadas do calendário numa lista só de eventos, já expandida
  * por dia: captações, prazos de entrega, reservas de tempo e vencimentos.
  */
-export async function eventosDoPeriodo(de: string, ate: string): Promise<EventoAgenda[]> {
+export async function eventosDoPeriodo(de: string, ate: string): Promise<AgendaDoPeriodo> {
   const fora = `(${STATUS_FORA.join(",")})`;
 
   const [captacoes, entregas, compromissos, parcelas] = await Promise.all([
@@ -136,7 +142,11 @@ export async function eventosDoPeriodo(de: string, ate: string): Promise<EventoA
 
   if (captacoes.error) throw traduzErro(captacoes.error, "carregar as captações");
   if (entregas.error) throw traduzErro(entregas.error, "carregar os prazos");
-  if (parcelas.error) throw traduzErro(parcelas.error, "carregar os vencimentos");
+
+  // A camada de pagamento é a única opcional: se ela falhar, o calendário ainda
+  // vale por inteiro para a agenda de trabalho. Derrubar as outras três porque
+  // o financeiro tropeçou seria trocar uma tela incompleta por nenhuma tela.
+  const vencimentosIndisponiveis = Boolean(parcelas.error);
 
   const eventos: EventoAgenda[] = [];
 
@@ -187,7 +197,7 @@ export async function eventosDoPeriodo(de: string, ate: string): Promise<EventoA
     }
   }
 
-  for (const p of parcelas.data ?? []) {
+  for (const p of vencimentosIndisponiveis ? [] : (parcelas.data ?? [])) {
     const job = p.job as unknown as { id: string; titulo: string } | null;
     const contrato = p.contrato as unknown as { descricao: string } | null;
     eventos.push({
@@ -207,7 +217,8 @@ export async function eventosDoPeriodo(de: string, ate: string): Promise<EventoA
     });
   }
 
-  return eventos.sort((a, b) => a.data.localeCompare(b.data) || a.camada.localeCompare(b.camada));
+  eventos.sort((a, b) => a.data.localeCompare(b.data) || a.camada.localeCompare(b.camada));
+  return { eventos, vencimentosIndisponiveis };
 }
 
 // --- conflitos (regra R2) -------------------------------------------------

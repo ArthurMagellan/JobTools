@@ -37,6 +37,7 @@ export function CalendarioPage() {
   const [jobs, setJobs] = useState<JobCompleto[]>([]);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
+  const [semVencimentos, setSemVencimentos] = useState(false);
 
   const [diaAberto, setDiaAberto] = useState<string | null>(null);
   const [reservando, setReservando] = useState(false);
@@ -51,8 +52,9 @@ export function CalendarioPage() {
   const carregar = useCallback(async () => {
     const [de, ate] = primeiroEUltimo(dias);
     try {
-      const [es, js] = await Promise.all([eventosDoPeriodo(de, ate), listarJobsDoQuadro()]);
-      setEventos(es);
+      const [agenda, js] = await Promise.all([eventosDoPeriodo(de, ate), listarJobsDoQuadro()]);
+      setEventos(agenda.eventos);
+      setSemVencimentos(agenda.vencimentosIndisponiveis);
       setJobs(js);
       setErro(null);
     } catch (falha) {
@@ -149,6 +151,14 @@ export function CalendarioPage() {
       </header>
 
       {erro && <Aviso tom="erro">{erro}</Aviso>}
+      {semVencimentos && (
+        <div style={{ marginBottom: "var(--esp-4)" }}>
+          <Aviso tom="atencao">
+            A camada de pagamento não pôde ser lida — provavelmente o financeiro ainda não foi
+            criado no banco. O resto da agenda está completo.
+          </Aviso>
+        </div>
+      )}
 
       <Legenda />
 
