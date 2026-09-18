@@ -1,9 +1,11 @@
 import { supabase } from "../lib/supabase";
 import { limpo, traduzErro } from "./base";
-import type { Contrato, ContratoCompleto, Parcela, ParcelaCompleta } from "./types";
+import { STATUS_FORA, type Contrato, type ContratoCompleto, type Parcela, type ParcelaCompleta } from "./types";
+import { previsaoPeloPrazo } from "../lib/contas";
 
+// String literal única de propósito: quebrar com `+` derruba a inferência de tipo do Supabase.
 const SELECT_PARCELA =
-  "*, job:jobs(id, titulo, cliente:clientes(nome)), contrato:contratos(id, descricao, cliente:clientes(nome))";
+  "*, job:jobs(id, titulo, cliente:clientes(nome, prazo_pagamento_dias)), contrato:contratos(id, descricao, cliente:clientes(nome, prazo_pagamento_dias))";
 
 // --- contratos ------------------------------------------------------------
 
@@ -203,4 +205,55 @@ export {
   resumoDoMes,
   previsaoMeses,
   previsaoPeloPrazo,
+  resumoDoJob,
+  ROTULO_ESTADO_FINANCEIRO,
 } from "../lib/contas";
+export type { EstadoFinanceiro, ResumoDoJob } from "../lib/contas";
+
+/**
+ * Garante que um job com cachê tenha ao menos uma parcela.
+ *
+ * Sem isto, salvar um job com valor não faz nada aparecer no financeiro — o
+ * dinheiro fica invisível até você lembrar de criar a parcela na mão. Job
+ * incluso em contrato fica de fora: o dinheiro dele está na mensalidade (R1).
+ */
+export async function garantirParcelaDoJob(
+  jobId: string,
+  valor: number | null,
+  prazoDias: number | null
+): Promise<boolean> {
+  if (!valor || valor <= 0) return false;
+
+  const existentes = await listarParcelasDoJob(jobId);
+  if (existentes.length > 0) return false;
+
+  await criarParcela({
+    job_id: jobId,
+    valor,
+    data_prevista: previsaoPeloPrazo(prazoDias),
+    confianca: "estimada",
+  });
+  return true;
+}
+
+/** Jobs com cachê fechado que ainda não têm parcela — dinheiro fora do radar. */
+export async function listarJobsSemParcela() {
+  const { data, error } = await supabase
+    .from("jobs")
+    .select("id, titulo, valor_fechado, status, cliente:clientes(id, nome, prazo_pagamento_dias), parcelas(id)")
+    .not("valor_fechado", "is", null)
+    .gt("valor_fechado", 0)
+    .eq("forma_cobranca", "avulso")
+    .not("status", "in", `(${STATUS_FORA.join(",")})`);
+
+  if (error) throw traduzErro(error, "procurar jobs sem parcela");
+
+  return (data ?? []).filter(
+    (j) => ((j as unknown as { parcelas: unknown[] }).parcelas ?? []).length === 0
+  ) as unknown as {
+    id: string;
+    titulo: string;
+    valor_fechado: number;
+    cliente: { id: string; nome: string; prazo_pagamento_dias: number | null } | null;
+  }[];
+}

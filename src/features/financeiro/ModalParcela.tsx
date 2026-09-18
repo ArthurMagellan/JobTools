@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { atualizarParcela, removerParcela } from "../../data/financeiro";
-import { hojeISO } from "../../lib/formato";
+import { atualizarParcela, previsaoPeloPrazo, removerParcela } from "../../data/financeiro";
+import { dataCompleta, hojeISO } from "../../lib/formato";
 import {
   AJUDA_CONFIANCA,
   ROTULO_CONFIANCA,
@@ -20,6 +20,7 @@ type Rascunho = {
   nota: string;
   nf_emitida: boolean;
   nf_numero: string;
+  data_nf: string;
 };
 
 /**
@@ -47,6 +48,7 @@ export function ModalParcela({
     nota: "",
     nf_emitida: false,
     nf_numero: "",
+    data_nf: "",
   });
   const [erro, setErro] = useState<string | null>(null);
   const [salvando, setSalvando] = useState(false);
@@ -63,8 +65,20 @@ export function ModalParcela({
       nota: parcela.nota ?? "",
       nf_emitida: parcela.nf_emitida,
       nf_numero: parcela.nf_numero ?? "",
+      data_nf: parcela.data_nf ?? "",
     });
   }, [aberto, parcela]);
+
+  // O prazo vem do cadastro do cliente, seja o job dele ou o contrato.
+  const prazoDias =
+    parcela?.job?.cliente?.prazo_pagamento_dias ??
+    parcela?.contrato?.cliente?.prazo_pagamento_dias ??
+    null;
+
+  const sugestao =
+    r.nf_emitida && r.data_nf && prazoDias !== null
+      ? previsaoPeloPrazo(prazoDias, r.data_nf)
+      : null;
 
   function mudar<K extends keyof Rascunho>(campo: K, valor: Rascunho[K]) {
     setR((atual) => ({ ...atual, [campo]: valor }));
@@ -89,6 +103,7 @@ export function ModalParcela({
         nota: r.nota || null,
         nf_emitida: r.nf_emitida,
         nf_numero: r.nf_numero || null,
+        data_nf: r.nf_emitida ? r.data_nf || null : null,
       });
       aoSalvar();
       aoFechar();
@@ -203,9 +218,48 @@ export function ModalParcela({
           <Marcacao
             rotulo="Nota fiscal emitida"
             checked={r.nf_emitida}
-            onChange={(e) => mudar("nf_emitida", e.target.checked)}
+            onChange={(e) => {
+              mudar("nf_emitida", e.target.checked);
+              if (e.target.checked && !r.data_nf) mudar("data_nf", hojeISO());
+            }}
           />
         </div>
+
+        {r.nf_emitida && (
+          <>
+            <Campo
+              rotulo="Nota emitida em"
+              type="date"
+              value={r.data_nf}
+              onChange={(e) => mudar("data_nf", e.target.value)}
+              dica={
+                prazoDias === null
+                  ? "Cadastre o prazo de pagamento no cliente para o vencimento se recalcular sozinho."
+                  : `Este cliente paga em ${prazoDias === 0 ? "dia de emissão" : `${prazoDias} dias`}.`
+              }
+            />
+
+            <div style={{ display: "flex", alignItems: "flex-end" }}>
+              <Botao
+                onClick={() => mudar("data_prevista", previsaoPeloPrazo(prazoDias, r.data_nf))}
+                disabled={!r.data_nf}
+                title="Recalcula o vencimento contando o prazo a partir da emissão"
+              >
+                Contar prazo a partir da nota
+              </Botao>
+            </div>
+
+            {sugestao && sugestao !== r.data_prevista && (
+              <div className="grade__largo">
+                <Aviso tom="atencao">
+                  Emitindo em {dataCompleta(r.data_nf)} com prazo de {prazoDias} dias, o dinheiro
+                  cairia em <strong>{dataCompleta(sugestao)}</strong>. O vencimento aqui está{" "}
+                  {dataCompleta(r.data_prevista)}.
+                </Aviso>
+              </div>
+            )}
+          </>
+        )}
 
         <Area
           rotulo="Nota"

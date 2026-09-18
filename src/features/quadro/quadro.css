@@ -8,21 +8,32 @@
   font-size: var(--texto-md);
 }
 
+/* As nove colunas cabem na tela: elas encolhem juntas em vez de empurrar o
+   quadro para fora. So abaixo de 1500px volta a rolagem horizontal, quando
+   espremer mais tornaria o cartao ilegivel. */
 .quadro {
   display: grid;
-  grid-auto-flow: column;
-  grid-auto-columns: 252px;
-  gap: var(--esp-3);
-  overflow-x: auto;
-  padding-bottom: var(--esp-4);
+  grid-template-columns: repeat(9, minmax(0, 1fr));
+  gap: var(--esp-2);
   align-items: start;
+}
+
+@media (max-width: 1500px) {
+  .quadro {
+    grid-template-columns: none;
+    grid-auto-flow: column;
+    grid-auto-columns: 224px;
+    gap: var(--esp-3);
+    overflow-x: auto;
+    padding-bottom: var(--esp-4);
+  }
 }
 
 .coluna {
   background: var(--cor-afundado);
   border: 1px solid var(--cor-linha-suave);
   border-radius: var(--raio-lg);
-  padding: var(--esp-3);
+  padding: var(--esp-2);
   min-height: 140px;
   transition: border-color 0.12s, background 0.12s;
 }
@@ -59,10 +70,15 @@
 }
 
 .coluna__ajuda {
-  font-size: 10.5px;
-  line-height: 1.4;
+  font-size: 10px;
+  line-height: 1.35;
   color: var(--cor-texto-suave);
   margin-bottom: var(--esp-2);
+  /* Duas linhas bastam como lembrete; o texto inteiro fica no title. */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .coluna__pilha {
@@ -83,11 +99,11 @@
 .cartao {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 4px;
   background: var(--cor-superficie);
   border: 1px solid var(--cor-linha);
   border-radius: var(--raio-md);
-  padding: var(--esp-3);
+  padding: var(--esp-2) 10px;
   cursor: grab;
   box-shadow: var(--sombra-sm);
   touch-action: none;
@@ -147,4 +163,10 @@
   font-size: var(--texto-xs);
   font-weight: 500;
   color: var(--cor-texto-medio);
+}
+
+.cartao__dinheiro {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
 }

@@ -23,6 +23,8 @@ import {
 import { dataCurta, diasAte, moedaCurta, prazoEmPalavras } from "../../lib/formato";
 import { Aviso, Botao, Carregando, Etiqueta } from "../../components/ui";
 import { ModalJob } from "../jobs/JobForm";
+import { ModalContrato } from "../financeiro/ModalContrato";
+import { ROTULO_ESTADO_FINANCEIRO, resumoDoJob } from "../../data/financeiro";
 import "./quadro.css";
 
 export function QuadroPage() {
@@ -33,6 +35,7 @@ export function QuadroPage() {
   const [erro, setErro] = useState<string | null>(null);
   const [filtroCliente, setFiltroCliente] = useState("");
   const [modalAberto, setModalAberto] = useState(false);
+  const [contratoAberto, setContratoAberto] = useState(false);
 
   // Sensores com distância mínima: arrastar não pode roubar o clique do cartão.
   const sensores = useSensors(
@@ -106,6 +109,9 @@ export function QuadroPage() {
               </option>
             ))}
           </select>
+          <Botao onClick={() => setContratoAberto(true)} disabled={clientes.length === 0}>
+            Novo contrato
+          </Botao>
           <Botao
             variante="principal"
             onClick={() => setModalAberto(true)}
@@ -137,6 +143,12 @@ export function QuadroPage() {
           ))}
         </div>
       </DndContext>
+
+      <ModalContrato
+        aberto={contratoAberto}
+        aoFechar={() => setContratoAberto(false)}
+        aoSalvar={() => undefined}
+      />
 
       <ModalJob
         aberto={modalAberto}
@@ -197,6 +209,7 @@ function Cartao({ job, aoAbrir }: { job: JobCompleto; aoAbrir: (id: string) => v
   const proxima = job.datas.find((d) => (diasAte(d.data) ?? -1) >= 0) ?? job.datas[0];
   const dias = diasAte(job.prazo_entrega);
   const tomPrazo = dias === null ? "neutro" : dias < 0 ? "perigo" : dias <= 3 ? "atencao" : "neutro";
+  const financeiro = resumoDoJob(job.parcelas ?? [], job.valor_fechado);
 
   return (
     <article
@@ -225,6 +238,44 @@ function Cartao({ job, aoAbrir }: { job: JobCompleto; aoAbrir: (id: string) => v
           </span>
         )}
       </div>
+
+      {financeiro.estado !== "sem_valor" && (
+        <div className="cartao__dinheiro">
+          <Etiqueta
+            tom={
+              financeiro.estado === "pago"
+                ? "ok"
+                : financeiro.estado === "atrasado"
+                  ? "perigo"
+                  : financeiro.estado === "sem_parcela"
+                    ? "atencao"
+                    : "neutro"
+            }
+            title={
+              financeiro.estado === "sem_parcela"
+                ? "Job com cachê mas sem parcela — não aparece no financeiro. Abra o job para gerar."
+                : undefined
+            }
+          >
+            {ROTULO_ESTADO_FINANCEIRO[financeiro.estado]}
+          </Etiqueta>
+
+          {financeiro.estado !== "sem_parcela" && (
+            <Etiqueta
+              tom={financeiro.nf === "todas" ? "ok" : "atencao"}
+              title={
+                financeiro.nf === "todas"
+                  ? "Nota fiscal emitida"
+                  : financeiro.nf === "parcial"
+                    ? "Parte das parcelas ainda sem nota"
+                    : "Nota fiscal ainda não emitida"
+              }
+            >
+              {financeiro.nf === "todas" ? "NF ✓" : financeiro.nf === "parcial" ? "NF ½" : "s/ NF"}
+            </Etiqueta>
+          )}
+        </div>
+      )}
 
       <footer className="cartao__rodape">
         {proxima && (

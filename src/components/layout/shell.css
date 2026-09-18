@@ -172,14 +172,12 @@ body {
 
 @media (min-width: 900px) {
   .pagina-fundo {
-    padding: var(--esp-5);
+    padding: var(--esp-3);
   }
 
   .casca {
     grid-template-columns: var(--largura-menu) minmax(0, 1fr);
-    min-height: calc(100vh - var(--esp-6));
-    max-width: 1560px;
-    margin: 0 auto;
+    min-height: calc(100vh - var(--esp-5));
     border: 1px solid var(--cor-linha);
     border-radius: var(--raio-xl);
     box-shadow: var(--sombra-casca);
@@ -187,7 +185,7 @@ body {
   }
 
   .conteudo {
-    padding: var(--esp-5) var(--esp-6) var(--esp-6);
+    padding: var(--esp-4) var(--esp-5) var(--esp-5);
   }
 
   .menu {
@@ -241,6 +239,8 @@ body {
 
   .menu__lista li {
     display: block;
+    /* Sem isto, o flex:1 do celular estica cada item pela altura da coluna. */
+    flex: none;
   }
 
   .menu__item {

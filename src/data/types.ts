@@ -142,6 +142,7 @@ export interface Job {
 export interface JobCompleto extends Job {
   cliente: Pick<Cliente, "id" | "nome"> | null;
   datas: JobData[];
+  parcelas: ParcelaNoCartao[];
 }
 
 export interface Comentario {
@@ -329,13 +330,24 @@ export interface Parcela {
   nota: string | null;
   nf_emitida: boolean;
   nf_numero: string | null;
+  /**
+   * Quando a nota foi emitida. Muita empresa só começa a contar o prazo a partir
+   * daqui — emitiu dia 20 com prazo de 30, o dinheiro cai dia 20 do mês seguinte.
+   */
+  data_nf: string | null;
   created_at: string;
   updated_at: string;
 }
 
+/** O prazo padrão do cliente vem junto: é ele que recalcula o vencimento. */
+interface ClienteNaParcela {
+  nome: string;
+  prazo_pagamento_dias: number | null;
+}
+
 export interface ParcelaCompleta extends Parcela {
-  job: { id: string; titulo: string; cliente: { nome: string } | null } | null;
-  contrato: { id: string; descricao: string; cliente: { nome: string } | null } | null;
+  job: { id: string; titulo: string; cliente: ClienteNaParcela | null } | null;
+  contrato: { id: string; descricao: string; cliente: ClienteNaParcela | null } | null;
 }
 
 /**
@@ -354,4 +366,13 @@ export interface MesPrevisto {
   competencia: string;
   confirmado: number;
   estimado: number;
+}
+
+/** O mínimo de financeiro que o cartão do quadro precisa mostrar. */
+export interface ParcelaNoCartao {
+  id: string;
+  valor: number;
+  confianca: Confianca;
+  data_prevista: string;
+  nf_emitida: boolean;
 }

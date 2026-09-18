@@ -80,3 +80,53 @@ export function previsaoPeloPrazo(prazoDias: number | null, base = hojeISO()): s
     d.getDate()
   ).padStart(2, "0")}`;
 }
+
+// --- resumo por job (o que o cartão do quadro mostra) ---------------------
+
+export type EstadoFinanceiro = "sem_valor" | "sem_parcela" | "a_receber" | "atrasado" | "pago";
+
+export interface ResumoDoJob {
+  estado: EstadoFinanceiro;
+  total: number;
+  /** Nenhuma nota emitida, algumas, ou todas. */
+  nf: "nenhuma" | "parcial" | "todas";
+}
+
+/**
+ * Traduz as parcelas de um job em duas informações que cabem num cartão:
+ * como está o dinheiro e como está a nota fiscal.
+ *
+ * "sem_parcela" é o estado que mais importa: job fechado com valor mas sem
+ * parcela nenhuma nunca aparece no financeiro — é dinheiro invisível.
+ */
+export function resumoDoJob(
+  parcelas: { valor: number; confianca: string; data_prevista: string; nf_emitida: boolean }[],
+  valorFechado: number | null,
+  hoje = hojeISO()
+): ResumoDoJob {
+  const total = parcelas.reduce((t, p) => t + Number(p.valor), 0);
+
+  if (parcelas.length === 0) {
+    return {
+      estado: valorFechado && valorFechado > 0 ? "sem_parcela" : "sem_valor",
+      total: Number(valorFechado ?? 0),
+      nf: "nenhuma",
+    };
+  }
+
+  const comNF = parcelas.filter((p) => p.nf_emitida).length;
+  const nf = comNF === 0 ? "nenhuma" : comNF === parcelas.length ? "todas" : "parcial";
+
+  const naoPagas = parcelas.filter((p) => p.confianca !== "paga");
+  if (naoPagas.length === 0) return { estado: "pago", total, nf };
+  if (naoPagas.some((p) => p.data_prevista < hoje)) return { estado: "atrasado", total, nf };
+  return { estado: "a_receber", total, nf };
+}
+
+export const ROTULO_ESTADO_FINANCEIRO: Record<EstadoFinanceiro, string> = {
+  sem_valor: "sem cachê",
+  sem_parcela: "sem parcela",
+  a_receber: "a receber",
+  atrasado: "atrasado",
+  pago: "pago",
+};

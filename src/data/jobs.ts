@@ -2,7 +2,8 @@ import { supabase } from "../lib/supabase";
 import { limpo, traduzErro } from "./base";
 import { STATUS_FORA, type Job, type JobCompleto, type JobData, type JobEntrada, type Status } from "./types";
 
-const SELECT_COMPLETO = "*, cliente:clientes(id, nome), datas:job_datas(*)";
+const SELECT_COMPLETO =
+  "*, cliente:clientes(id, nome), datas:job_datas(*), parcelas(id, valor, confianca, data_prevista, nf_emitida)";
 
 function ordenaDatas(job: JobCompleto): JobCompleto {
   return { ...job, datas: [...(job.datas ?? [])].sort((a, b) => a.data.localeCompare(b.data)) };

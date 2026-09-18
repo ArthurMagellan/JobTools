@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { adicionarData, atualizarJob, criarJob } from "../../data/jobs";
-import { listarContratos } from "../../data/financeiro";
+import { garantirParcelaDoJob, listarContratos } from "../../data/financeiro";
 import { ROTULO_COBRANCA, type Cliente, type ContratoCompleto, type FormaCobranca, type Job, type JobCompleto, type TipoJob } from "../../data/types";
 import { Area, Aviso, Botao, Campo, Marcacao, Modal, Selecao } from "../../components/ui";
 import { ModalCliente } from "../clientes/ClienteForm";
@@ -122,6 +122,17 @@ export function ModalJob({
       const salvo = job ? await atualizarJob(job.id, dados) : await criarJob(dados);
       if (!job && r.primeira_data) {
         await adicionarData(salvo.id, { data: r.primeira_data });
+      }
+
+      // Job com cachê precisa de parcela, senão o dinheiro nunca aparece no
+      // financeiro. Contrato fica de fora: o dele já está na mensalidade (R1).
+      if (r.forma_cobranca !== "incluso") {
+        const cliente = clientes.find((c) => c.id === r.cliente_id);
+        await garantirParcelaDoJob(
+          salvo.id,
+          dados.valor_fechado,
+          cliente?.prazo_pagamento_dias ?? null
+        );
       }
       aoSalvar(salvo);
       aoFechar();

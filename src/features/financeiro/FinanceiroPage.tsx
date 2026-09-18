@@ -6,6 +6,8 @@ import {
   listarContratos,
   listarParcelas,
   listarParcelasEmAberto,
+  listarJobsSemParcela,
+  garantirParcelaDoJob,
   marcarPaga,
   previsaoMeses,
   removerContrato,
@@ -23,6 +25,8 @@ import { Aviso, Botao, Carregando, Etiqueta, Indicador, Painel } from "../../com
 import { ModalContrato } from "./ModalContrato";
 import { ModalParcela } from "./ModalParcela";
 import "./financeiro.css";
+
+type JobSemParcela = Awaited<ReturnType<typeof listarJobsSemParcela>>[number];
 
 function mesDe(iso: string) {
   return iso.slice(0, 7);
@@ -45,6 +49,7 @@ export function FinanceiroPage() {
   const [erro, setErro] = useState<string | null>(null);
   const [geradas, setGeradas] = useState(0);
 
+  const [semParcela, setSemParcela] = useState<JobSemParcela[]>([]);
   const [editandoContrato, setEditandoContrato] = useState<ContratoCompleto | null>(null);
   const [novoContrato, setNovoContrato] = useState(false);
   const [editandoParcela, setEditandoParcela] = useState<ParcelaCompleta | null>(null);
@@ -56,14 +61,16 @@ export function FinanceiroPage() {
       const criadas = await gerarMensalidades();
       setGeradas(criadas);
 
-      const [ps, abertas, cs] = await Promise.all([
+      const [ps, abertas, cs, sp] = await Promise.all([
         listarParcelas(inicioDoMes(mes), fimDoMes(mes)),
         listarParcelasEmAberto(),
         listarContratos(),
+        listarJobsSemParcela(),
       ]);
       setDoMes(ps);
       setEmAberto(abertas);
       setContratos(cs);
+      setSemParcela(sp);
       setErro(null);
     } catch (falha) {
       setErro((falha as Error).message);
@@ -88,6 +95,18 @@ export function FinanceiroPage() {
   const previsao = useMemo(() => previsaoMeses(emAberto, hoje, 6), [emAberto, hoje]);
   const atrasadas = useMemo(() => emAberto.filter((p) => estaAtrasada(p, hoje)), [emAberto, hoje]);
   const tetoPrevisao = Math.max(...previsao.map((m) => m.confirmado + m.estimado), 1);
+
+  /** Cria a parcela de cada job fechado que ainda não tinha nenhuma. */
+  async function gerarTodasAsParcelas() {
+    try {
+      for (const j of semParcela) {
+        await garantirParcelaDoJob(j.id, j.valor_fechado, j.cliente?.prazo_pagamento_dias ?? null);
+      }
+      await carregar();
+    } catch (falha) {
+      setErro((falha as Error).message);
+    }
+  }
 
   function andarMes(passo: number) {
     const d = new Date(`${mes}-01T00:00:00`);
@@ -261,6 +280,48 @@ export function FinanceiroPage() {
           )}
         </Painel>
       </div>
+
+      {semParcela.length > 0 && (
+        <div style={{ marginTop: "var(--esp-4)" }}>
+          <Painel
+            titulo={`Fechados sem parcela · ${semParcela.length}`}
+            acao={
+              <Botao variante="principal" pequeno onClick={() => void gerarTodasAsParcelas()}>
+                Gerar todas
+              </Botao>
+            }
+          >
+            <p className="campo__dica" style={{ marginBottom: "var(--esp-3)" }}>
+              Estes jobs têm cachê fechado mas nenhuma parcela — por isso não entram em nenhum
+              número desta tela. Gerar a parcela usa o prazo de pagamento do cliente para prever
+              a data.
+            </p>
+
+            {semParcela.map((j) => (
+              <div className="linha" key={j.id}>
+                <div style={{ minWidth: 0 }}>
+                  <Link to={`/jobs/${j.id}`} className="linha__link">
+                    {j.titulo}
+                  </Link>
+                  <div className="linha__sub">
+                    {j.cliente?.nome}
+                    {j.cliente?.prazo_pagamento_dias !== null &&
+                      j.cliente?.prazo_pagamento_dias !== undefined && (
+                        <span>
+                          ·{" "}
+                          {j.cliente.prazo_pagamento_dias === 0
+                            ? "à vista"
+                            : `${j.cliente.prazo_pagamento_dias} dias`}
+                        </span>
+                      )}
+                  </div>
+                </div>
+                <span className="parcela__valor mono">{moeda(j.valor_fechado)}</span>
+              </div>
+            ))}
+          </Painel>
+        </div>
+      )}
 
       {atrasadas.length > 0 && (
         <div style={{ marginTop: "var(--esp-4)" }}>
