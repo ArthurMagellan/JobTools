@@ -8,10 +8,13 @@ import {
   tirarDoQuadro,
 } from "../../data/jobs";
 import { listarClientes } from "../../data/clientes";
+import { listarCompromissosDoJob, removerCompromisso } from "../../data/agenda";
 import { criarComentario, listarComentarios, removerComentario } from "../../data/comentarios";
 import { criarLink, diasParaExpirar, listarLinks, removerLink } from "../../data/links";
 import {
   ROTULO_COBRANCA,
+  ROTULO_COMPROMISSO,
+  ROTULO_PERIODO,
   ROTULO_LINK,
   ROTULO_STATUS,
   ROTULO_TIPO,
@@ -19,6 +22,7 @@ import {
   STATUS_QUADRO,
   type Cliente,
   type Comentario,
+  type CompromissoCompleto,
   type JobCompleto,
   type Link as LinkArquivo,
   type Status,
@@ -27,6 +31,7 @@ import {
 import { dataCompleta, horaCurta, moeda, quandoRelativo } from "../../lib/formato";
 import { Area, Aviso, Botao, Campo, Carregando, Etiqueta, Modal, Painel, Selecao } from "../../components/ui";
 import { ModalJob } from "./JobForm";
+import { ModalCompromisso } from "../calendario/ModalCompromisso";
 import "./job.css";
 
 export function JobPage() {
@@ -37,6 +42,8 @@ export function JobPage() {
   const [clientes, setClientes] = useState<Cliente[]>([]);
   const [comentarios, setComentarios] = useState<Comentario[]>([]);
   const [links, setLinks] = useState<LinkArquivo[]>([]);
+  const [blocos, setBlocos] = useState<CompromissoCompleto[]>([]);
+  const [reservando, setReservando] = useState(false);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
   const [editando, setEditando] = useState(false);
@@ -56,14 +63,16 @@ export function JobPage() {
   async function recarregar() {
     setCarregando(true);
     try {
-      const [j, cs, ls] = await Promise.all([
+      const [j, cs, ls, bs] = await Promise.all([
         obterJob(id),
         listarComentarios(id),
         listarLinks(id),
+        listarCompromissosDoJob(id),
       ]);
       setJob(j);
       setComentarios(cs);
       setLinks(ls);
+      setBlocos(bs);
       setErro(null);
     } catch (falha) {
       setErro((falha as Error).message);
@@ -277,6 +286,50 @@ export function JobPage() {
               </div>
             </div>
           </Painel>
+
+          <Painel
+            titulo={`Blocos de edição · ${blocos.length}`}
+            acao={
+              <Botao pequeno onClick={() => setReservando(true)}>
+                Reservar tempo
+              </Botao>
+            }
+          >
+            {blocos.length === 0 ? (
+              <p className="campo__dica">
+                Nenhum tempo reservado para editar este job. Um bloco aqui aparece no calendário
+                como compromisso seu — e, se uma captação cair em cima, o aviso é leve: editar
+                remarca, captação não.
+              </p>
+            ) : (
+              blocos.map((b) => (
+                <div className="linha" key={b.id}>
+                  <div>
+                    <div className="mono">
+                      {dataCompleta(b.data_inicio)}
+                      {b.data_fim && b.data_fim !== b.data_inicio && ` até ${dataCompleta(b.data_fim)}`}
+                    </div>
+                    <div className="linha__sub">
+                      <Etiqueta tom="macio">{ROTULO_COMPROMISSO[b.tipo]}</Etiqueta>
+                      <span>{ROTULO_PERIODO[b.periodo]}</span>
+                      {b.titulo && <span>· {b.titulo}</span>}
+                    </div>
+                  </div>
+                  <Botao
+                    variante="discreto"
+                    pequeno
+                    onClick={() => {
+                      void removerCompromisso(b.id).then(() =>
+                        setBlocos((atual) => atual.filter((x) => x.id !== b.id))
+                      );
+                    }}
+                  >
+                    Remover
+                  </Botao>
+                </div>
+              ))
+            )}
+          </Painel>
         </div>
 
         <div className="job__coluna">
@@ -426,6 +479,15 @@ export function JobPage() {
         clientes={clientes}
         aoFechar={() => setEditando(false)}
         aoCriarCliente={(c) => setClientes((atual) => [...atual, c])}
+        aoSalvar={() => void recarregar()}
+      />
+
+      <ModalCompromisso
+        aberto={reservando}
+        jobs={[job]}
+        jobPadrao={job.id}
+        dataPadrao={job.datas[0]?.data ?? job.prazo_entrega ?? new Date().toISOString().slice(0, 10)}
+        aoFechar={() => setReservando(false)}
         aoSalvar={() => void recarregar()}
       />
 

@@ -145,6 +145,45 @@ create table if not exists public.links (
   created_at  timestamptz not null default now()
 );
 
+-- ----------------------------------------------------------------------------
+-- COMPROMISSOS DE AGENDA (fase 2)
+--
+-- Seu tempo ocupado que não é captação: blocos de edição reservados para um job
+-- e bloqueios pessoais. Todos são compromissos MACIOS (regra R2) — acordos seus
+-- com você mesmo, que podem ser remarcados. Captação e prazo de entrega são
+-- duros, moram em jobs/job_datas, e não se remarcam sozinhos.
+-- ----------------------------------------------------------------------------
+create table if not exists public.compromissos (
+  id           uuid primary key default gen_random_uuid(),
+  dono         uuid not null default auth.uid() references auth.users(id) on delete cascade,
+
+  tipo         text not null default 'edicao'
+               check (tipo in ('edicao','tratamento','pessoal','outro')),
+
+  -- Obrigatório quando é edição ou tratamento; vazio quando é folga.
+  job_id       uuid references public.jobs(id) on delete cascade,
+
+  data_inicio  date not null,
+  data_fim     date,
+
+  periodo      text not null default 'dia'
+               check (periodo in ('dia','manha','tarde','horario')),
+  hora_inicio  time,
+  hora_fim     time,
+
+  titulo       text,
+  created_at   timestamptz not null default now(),
+  updated_at   timestamptz not null default now(),
+
+  constraint compromisso_precisa_de_job check (
+    (tipo in ('edicao','tratamento') and job_id is not null)
+    or tipo in ('pessoal','outro')
+  ),
+  constraint compromisso_faixa_valida check (
+    data_fim is null or data_fim >= data_inicio
+  )
+);
+
 -- ============================================================================
 -- MIGRAÇÕES
 -- Para bancos criados antes de uma coluna existir. O bloco acima cobre bancos
@@ -165,6 +204,8 @@ create index if not exists idx_job_datas_job      on public.job_datas(job_id);
 create index if not exists idx_job_datas_data     on public.job_datas(dono, data);
 create index if not exists idx_comentarios_job    on public.comentarios(job_id);
 create index if not exists idx_links_job          on public.links(job_id);
+create index if not exists idx_compromissos_periodo on public.compromissos(dono, data_inicio);
+create index if not exists idx_compromissos_job      on public.compromissos(job_id);
 
 -- ----------------------------------------------------------------------------
 -- Triggers de updated_at
@@ -175,6 +216,10 @@ create trigger trg_clientes_updated before update on public.clientes
 
 drop trigger if exists trg_jobs_updated on public.jobs;
 create trigger trg_jobs_updated before update on public.jobs
+  for each row execute function public.tocar_updated_at();
+
+drop trigger if exists trg_compromissos_updated on public.compromissos;
+create trigger trg_compromissos_updated before update on public.compromissos
   for each row execute function public.tocar_updated_at();
 
 -- ============================================================================
@@ -188,6 +233,7 @@ alter table public.jobs        enable row level security;
 alter table public.job_datas   enable row level security;
 alter table public.comentarios enable row level security;
 alter table public.links       enable row level security;
+alter table public.compromissos enable row level security;
 
 drop policy if exists p_clientes_dono on public.clientes;
 create policy p_clientes_dono on public.clientes
@@ -213,8 +259,12 @@ drop policy if exists p_links_dono on public.links;
 create policy p_links_dono on public.links
   for all to authenticated using (dono = auth.uid()) with check (dono = auth.uid());
 
+drop policy if exists p_compromissos_dono on public.compromissos;
+create policy p_compromissos_dono on public.compromissos
+  for all to authenticated using (dono = auth.uid()) with check (dono = auth.uid());
+
 -- ============================================================================
--- Conferência: rode isto depois e confirme que rls = true nas seis linhas.
+-- Conferência: rode isto depois e confirme que rls = true nas sete linhas.
 --   select tablename, rowsecurity as rls
 --   from pg_tables where schemaname = 'public' order by tablename;
 -- ============================================================================

@@ -7,7 +7,7 @@ import "./shell.css";
 const ITENS = [
   { para: "/quadro", rotulo: "Quadro", icone: "▦", fase: 1 },
   { para: "/clientes", rotulo: "Clientes", icone: "◎", fase: 1 },
-  { para: "/calendario", rotulo: "Calendário", icone: "▤", fase: 2 },
+  { para: "/calendario", rotulo: "Calendário", icone: "▤", fase: 1 },
   { para: "/financeiro", rotulo: "Financeiro", icone: "◈", fase: 3 },
 ] as const;
 

@@ -1,0 +1,332 @@
+/* Calendário: quatro camadas sobrepostas.
+   Compromisso duro tem cor cheia e borda sólida; compromisso macio — edição,
+   folga — tem tom dessaturado e borda tracejada (regra R2). A firmeza se lê
+   antes do texto. */
+
+.cal__titulo {
+  text-transform: lowercase;
+}
+
+.cal__navegacao {
+  display: flex;
+  gap: var(--esp-1);
+}
+
+.cal__visoes {
+  display: flex;
+  border: 1px solid var(--cor-linha);
+  border-radius: var(--raio-md);
+  overflow: hidden;
+  background: var(--cor-superficie);
+}
+
+.cal__visao {
+  border: none;
+  background: transparent;
+  padding: 7px 12px;
+  font-size: var(--texto-sm);
+  color: var(--cor-texto-suave);
+  cursor: pointer;
+}
+
+.cal__visao + .cal__visao {
+  border-left: 1px solid var(--cor-linha);
+}
+
+.cal__visao--ativa {
+  background: var(--cor-acento-lavado);
+  color: var(--cor-acento-forte);
+  font-weight: 600;
+}
+
+/* --- legenda --- */
+.cal__legenda {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--esp-2) var(--esp-4);
+  list-style: none;
+  margin: 0 0 var(--esp-4);
+  padding: 0;
+  font-size: var(--texto-sm);
+  color: var(--cor-texto-medio);
+}
+
+.cal__legenda li {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-2);
+}
+
+.cal__ponto {
+  width: 9px;
+  height: 9px;
+  border-radius: 2px;
+  flex: none;
+}
+
+.cal__ponto--captacao {
+  background: var(--cor-acento);
+}
+.cal__ponto--entrega {
+  background: var(--cor-perigo);
+}
+.cal__ponto--pagamento {
+  background: var(--cor-ok);
+}
+.cal__ponto--edicao {
+  background: var(--cor-macio-lavado);
+  border: 1px dashed var(--cor-macio);
+}
+
+.cal__futuro {
+  font-family: var(--fonte-mono);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--cor-texto-suave);
+  border: 1px solid var(--cor-linha);
+  border-radius: 2px;
+  padding: 1px 5px;
+}
+
+.cal__futuro--macio {
+  border-style: dashed;
+  border-color: var(--cor-macio);
+  color: var(--cor-macio);
+}
+
+/* --- grade --- */
+.cal {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 3px;
+}
+
+.cal__cabeca {
+  font-family: var(--fonte-mono);
+  font-size: var(--texto-xs);
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--cor-texto-suave);
+  text-align: center;
+  padding-bottom: var(--esp-2);
+}
+
+.cal__dia {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 3px;
+  min-height: 92px;
+  padding: 5px;
+  background: var(--cor-superficie);
+  border: 1px solid var(--cor-linha-suave);
+  border-radius: var(--raio-md);
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  overflow: hidden;
+}
+
+.cal__dia:hover {
+  border-color: var(--cor-acento);
+}
+
+.cal__dia--fds {
+  background: var(--cor-afundado);
+}
+
+.cal__dia--fora {
+  opacity: 0.45;
+}
+
+.cal__dia--hoje {
+  border-color: var(--cor-acento);
+  box-shadow: inset 0 0 0 1px var(--cor-acento);
+}
+
+.cal__dia--conflito {
+  border-color: var(--cor-perigo);
+}
+
+.cal__numero {
+  font-size: var(--texto-xs);
+  color: var(--cor-texto-suave);
+}
+
+.cal__dia--hoje .cal__numero {
+  color: var(--cor-acento-forte);
+  font-weight: 600;
+}
+
+.cal__alerta {
+  position: absolute;
+  top: 4px;
+  right: 5px;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: var(--cor-perigo);
+  color: var(--cor-superficie);
+  font-size: 10px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cal__eventos {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.cal__marca {
+  font-size: 10.5px;
+  line-height: 1.3;
+  padding: 2px 4px;
+  border-radius: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  border: 1px solid transparent;
+}
+
+.cal__marca b {
+  font-weight: 600;
+}
+
+.cal__marca--captacao {
+  background: var(--cor-acento-lavado);
+  border-color: var(--cor-acento);
+  color: var(--cor-acento-forte);
+}
+
+.cal__marca--entrega {
+  background: var(--cor-perigo-lavado);
+  border-color: var(--cor-perigo);
+  color: var(--cor-perigo);
+}
+
+.cal__marca--pagamento {
+  background: var(--cor-ok-lavado);
+  border-color: var(--cor-ok);
+  color: var(--cor-ok);
+}
+
+.cal__marca--edicao {
+  background: var(--cor-macio-lavado);
+  border: 1px dashed var(--cor-macio);
+  color: var(--cor-macio);
+}
+
+.cal__mais {
+  font-size: 10px;
+  color: var(--cor-texto-suave);
+  padding-left: 4px;
+}
+
+@media (max-width: 720px) {
+  .cal__dia {
+    min-height: 64px;
+  }
+  .cal__marca {
+    font-size: 9.5px;
+  }
+}
+
+/* --- lista de 7 dias --- */
+.cal__lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--cor-linha);
+  border-radius: var(--raio-lg);
+  background: var(--cor-superficie);
+  overflow: hidden;
+}
+
+.cal__lista li + li .cal__linha {
+  border-top: 1px solid var(--cor-linha-suave);
+}
+
+.cal__linha {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--esp-2);
+  width: 100%;
+  padding: var(--esp-3) var(--esp-4);
+  background: none;
+  border: none;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+.cal__linha:hover {
+  background: var(--cor-afundado);
+}
+
+@media (min-width: 620px) {
+  .cal__linha {
+    grid-template-columns: 150px minmax(0, 1fr);
+    align-items: baseline;
+  }
+}
+
+.cal__linha-data {
+  font-size: var(--texto-sm);
+  color: var(--cor-texto-suave);
+}
+
+.cal__linha-data--hoje {
+  color: var(--cor-acento-forte);
+  font-weight: 600;
+}
+
+.cal__linha-eventos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--esp-1);
+}
+
+/* --- detalhe do dia --- */
+.cal__detalhe {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.cal__detalhe li {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--esp-3);
+  padding: var(--esp-3) 0;
+  border-bottom: 1px solid var(--cor-linha-suave);
+}
+
+.cal__detalhe li:last-child {
+  border-bottom: none;
+}
+
+.cal__detalhe .cal__ponto {
+  margin-top: 6px;
+}
+
+.cal__detalhe-titulo {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-2);
+  flex-wrap: wrap;
+  font-size: var(--texto-md);
+  font-weight: 500;
+}
+
+.cal__detalhe-sub {
+  font-size: var(--texto-sm);
+  color: var(--cor-texto-suave);
+}

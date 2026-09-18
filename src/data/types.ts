@@ -170,3 +170,86 @@ export type JobEntrada = Partial<Omit<Job, "id" | "created_at" | "updated_at">> 
   titulo: string;
   cliente_id: string;
 };
+
+// ============================================================================
+// AGENDA (fase 2)
+// ============================================================================
+
+export type TipoCompromisso = "edicao" | "tratamento" | "pessoal" | "outro";
+export type PeriodoDia = "dia" | "manha" | "tarde" | "horario";
+
+export const ROTULO_COMPROMISSO: Record<TipoCompromisso, string> = {
+  edicao: "Edição",
+  tratamento: "Tratamento de foto",
+  pessoal: "Pessoal / folga",
+  outro: "Outro",
+};
+
+/** Edição e tratamento existem para um job; folga é só sua. */
+export const COMPROMISSO_PRECISA_JOB: TipoCompromisso[] = ["edicao", "tratamento"];
+
+export const ROTULO_PERIODO: Record<PeriodoDia, string> = {
+  dia: "Dia inteiro",
+  manha: "Manhã",
+  tarde: "Tarde",
+  horario: "Horário exato",
+};
+
+export interface Compromisso {
+  id: string;
+  tipo: TipoCompromisso;
+  job_id: string | null;
+  data_inicio: string;
+  data_fim: string | null;
+  periodo: PeriodoDia;
+  hora_inicio: string | null;
+  hora_fim: string | null;
+  titulo: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CompromissoCompleto extends Compromisso {
+  job: { id: string; titulo: string } | null;
+}
+
+/**
+ * As quatro camadas do calendário. Pagamento só ganha eventos na fase 3 —
+ * até lá aparece na legenda, vazia, para o calendário não mentir sobre o que
+ * ainda não sabe.
+ */
+export type CamadaAgenda = "captacao" | "entrega" | "edicao" | "pagamento";
+
+/**
+ * Regra R2. Compromisso DURO tem cliente do outro lado e não remarca sozinho:
+ * dois deles no mesmo dia é alerta forte. Compromisso MACIO é um acordo seu com
+ * você mesmo — se uma captação cair em cima, o sistema avisa de leve e segue.
+ */
+export type Firmeza = "dura" | "macia";
+
+export const ROTULO_CAMADA: Record<CamadaAgenda, string> = {
+  captacao: "Captação",
+  entrega: "Entrega",
+  edicao: "Edição e folgas",
+  pagamento: "Pagamento",
+};
+
+export const FIRMEZA_DA_CAMADA: Record<CamadaAgenda, Firmeza> = {
+  captacao: "dura",
+  entrega: "dura",
+  edicao: "macia",
+  pagamento: "dura",
+};
+
+/** Um item desenhado no calendário, venha ele de onde vier. */
+export interface EventoAgenda {
+  chave: string;
+  camada: CamadaAgenda;
+  firmeza: Firmeza;
+  data: string;
+  titulo: string;
+  detalhe: string | null;
+  hora: string | null;
+  jobId: string | null;
+  compromissoId: string | null;
+}
