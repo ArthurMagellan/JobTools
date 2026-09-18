@@ -206,7 +206,8 @@
 .modal__fundo {
   position: fixed;
   inset: 0;
-  background: rgba(10, 18, 17, 0.45);
+  background: var(--cor-veu);
+  backdrop-filter: blur(2px);
   display: flex;
   align-items: flex-start;
   justify-content: center;
@@ -285,4 +286,87 @@
   .grade__largo {
     grid-column: 1 / -1;
   }
+}
+
+/* --- indicador --- */
+.indicadores {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(178px, 1fr));
+  gap: var(--esp-3);
+  margin-bottom: var(--esp-5);
+}
+
+.indicador {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--esp-3);
+  background: var(--cor-superficie);
+  border: 1px solid var(--cor-linha);
+  border-radius: var(--raio-lg);
+  padding: var(--esp-4);
+  box-shadow: var(--sombra-sm);
+}
+
+.indicador__icone {
+  width: 32px;
+  height: 32px;
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--raio-md);
+  background: var(--cor-afundado);
+  color: var(--cor-texto-suave);
+  font-size: 15px;
+}
+
+.indicador--acento .indicador__icone {
+  background: var(--cor-acento-lavado);
+  color: var(--cor-acento-forte);
+}
+.indicador--ok .indicador__icone {
+  background: var(--cor-ok-lavado);
+  color: var(--cor-ok);
+}
+.indicador--atencao .indicador__icone {
+  background: var(--cor-atencao-lavado);
+  color: var(--cor-atencao);
+}
+.indicador--perigo .indicador__icone {
+  background: var(--cor-perigo-lavado);
+  color: var(--cor-perigo);
+}
+
+.indicador__corpo {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.indicador__valor {
+  font-family: var(--fonte-titulo);
+  font-size: var(--texto-xl);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+
+.indicador--perigo .indicador__valor {
+  color: var(--cor-perigo);
+}
+.indicador--ok .indicador__valor {
+  color: var(--cor-ok);
+}
+
+.indicador__rotulo {
+  font-size: var(--texto-sm);
+  color: var(--cor-texto-suave);
+}
+
+.indicador__apoio {
+  font-size: var(--texto-xs);
+  color: var(--cor-texto-suave);
+  margin-top: 3px;
 }

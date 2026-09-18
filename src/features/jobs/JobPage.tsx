@@ -9,11 +9,20 @@ import {
 } from "../../data/jobs";
 import { listarClientes } from "../../data/clientes";
 import { listarCompromissosDoJob, removerCompromisso } from "../../data/agenda";
+import {
+  criarParcela,
+  estaAtrasada,
+  listarParcelasDoJob,
+  marcarPaga,
+  previsaoPeloPrazo,
+  removerParcela,
+} from "../../data/financeiro";
 import { criarComentario, listarComentarios, removerComentario } from "../../data/comentarios";
 import { criarLink, diasParaExpirar, listarLinks, removerLink } from "../../data/links";
 import {
   ROTULO_COBRANCA,
   ROTULO_COMPROMISSO,
+  ROTULO_CONFIANCA,
   ROTULO_PERIODO,
   ROTULO_LINK,
   ROTULO_STATUS,
@@ -23,12 +32,13 @@ import {
   type Cliente,
   type Comentario,
   type CompromissoCompleto,
+  type Parcela,
   type JobCompleto,
   type Link as LinkArquivo,
   type Status,
   type TipoLink,
 } from "../../data/types";
-import { dataCompleta, horaCurta, moeda, quandoRelativo } from "../../lib/formato";
+import { dataCompleta, hojeISO, horaCurta, moeda, quandoRelativo } from "../../lib/formato";
 import { Area, Aviso, Botao, Campo, Carregando, Etiqueta, Modal, Painel, Selecao } from "../../components/ui";
 import { ModalJob } from "./JobForm";
 import { ModalCompromisso } from "../calendario/ModalCompromisso";
@@ -44,6 +54,7 @@ export function JobPage() {
   const [links, setLinks] = useState<LinkArquivo[]>([]);
   const [blocos, setBlocos] = useState<CompromissoCompleto[]>([]);
   const [reservando, setReservando] = useState(false);
+  const [parcelas, setParcelas] = useState<Parcela[]>([]);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
   const [editando, setEditando] = useState(false);
@@ -63,16 +74,18 @@ export function JobPage() {
   async function recarregar() {
     setCarregando(true);
     try {
-      const [j, cs, ls, bs] = await Promise.all([
+      const [j, cs, ls, bs, ps] = await Promise.all([
         obterJob(id),
         listarComentarios(id),
         listarLinks(id),
         listarCompromissosDoJob(id),
+        listarParcelasDoJob(id),
       ]);
       setJob(j);
       setComentarios(cs);
       setLinks(ls);
       setBlocos(bs);
+      setParcelas(ps);
       setErro(null);
     } catch (falha) {
       setErro((falha as Error).message);
@@ -96,6 +109,29 @@ export function JobPage() {
     try {
       await tirarDoQuadro(job.id, encerrando, motivo);
       navegar("/quadro");
+    } catch (falha) {
+      setErro((falha as Error).message);
+    }
+  }
+
+  const clienteCompleto = clientes.find((c) => c.id === job?.cliente_id);
+  const somaParcelas = parcelas.reduce((t, p) => t + Number(p.valor), 0);
+
+  /**
+   * Cria a parcela do saldo restante, com a data ja calculada pelo prazo padrao
+   * do cliente — e o que evita voce fazer essa conta na mao (regra R5).
+   */
+  async function adicionarParcela() {
+    if (!job) return;
+    const restante = Number(job.valor_fechado ?? 0) - somaParcelas;
+    try {
+      const nova = await criarParcela({
+        job_id: job.id,
+        valor: restante > 0 ? restante : 0,
+        data_prevista: previsaoPeloPrazo(clienteCompleto?.prazo_pagamento_dias ?? null),
+        confianca: "estimada",
+      });
+      setParcelas((atual) => [...atual, nova]);
     } catch (falha) {
       setErro((falha as Error).message);
     }
@@ -164,7 +200,7 @@ export function JobPage() {
               rotulo="Status de produção"
               value={job.status}
               onChange={(e) => void trocarStatus(e.target.value as Status)}
-              dica="Produção e dinheiro correm em trilhas separadas — o financeiro entra na fase 3."
+              dica="Produção e dinheiro correm em trilhas separadas: mover aqui não mexe em parcela nenhuma."
             >
               {STATUS_QUADRO.map((s) => (
                 <option key={s} value={s}>
@@ -333,6 +369,88 @@ export function JobPage() {
         </div>
 
         <div className="job__coluna">
+          <Painel
+            titulo={`Parcelas · ${parcelas.length}`}
+            acao={
+              job.forma_cobranca === "incluso" ? null : (
+                <Botao pequeno onClick={() => void adicionarParcela()}>
+                  Nova parcela
+                </Botao>
+              )
+            }
+          >
+            {job.forma_cobranca === "incluso" ? (
+              <Aviso>
+                Job incluso no contrato — o dinheiro dele está na mensalidade, não aqui. Somar os
+                dois contaria o mesmo valor duas vezes.
+              </Aviso>
+            ) : parcelas.length === 0 ? (
+              <p className="campo__dica">
+                Nenhuma parcela. {moeda(job.valor_fechado)} fechado
+                {clienteCompleto?.prazo_pagamento_dias !== null &&
+                clienteCompleto?.prazo_pagamento_dias !== undefined
+                  ? ` — o prazo padrão deste cliente é ${clienteCompleto.prazo_pagamento_dias === 0 ? "à vista" : `${clienteCompleto.prazo_pagamento_dias} dias`}, e a parcela já nasce com a data certa.`
+                  : "."}
+              </p>
+            ) : (
+              parcelas.map((p) => (
+                <div className="linha" key={p.id}>
+                  <div>
+                    <div className="mono">{moeda(p.valor)}</div>
+                    <div className="linha__sub">
+                      <span>vence {dataCompleta(p.data_prevista)}</span>
+                      <Etiqueta
+                        tom={
+                          estaAtrasada(p)
+                            ? "perigo"
+                            : p.confianca === "paga"
+                              ? "ok"
+                              : p.confianca === "confirmada"
+                                ? "acento"
+                                : "atencao"
+                        }
+                      >
+                        {estaAtrasada(p) ? "atrasada" : ROTULO_CONFIANCA[p.confianca]}
+                      </Etiqueta>
+                    </div>
+                  </div>
+                  <div style={{ display: "flex", gap: 2 }}>
+                    {p.confianca !== "paga" && (
+                      <Botao
+                        pequeno
+                        onClick={() => {
+                          void marcarPaga(p.id, hojeISO()).then(() => void recarregar());
+                        }}
+                      >
+                        Recebi
+                      </Botao>
+                    )}
+                    <Botao
+                      variante="discreto"
+                      pequeno
+                      onClick={() => {
+                        void removerParcela(p.id).then(() =>
+                          setParcelas((atual) => atual.filter((x) => x.id !== p.id))
+                        );
+                      }}
+                    >
+                      ✕
+                    </Botao>
+                  </div>
+                </div>
+              ))
+            )}
+
+            {parcelas.length > 0 && somaParcelas !== (job.valor_fechado ?? 0) && (
+              <div style={{ marginTop: "var(--esp-3)" }}>
+                <Aviso tom="atencao">
+                  As parcelas somam {moeda(somaParcelas)}, mas o cachê fechado é{" "}
+                  {moeda(job.valor_fechado)}. Diferença de {moeda(Math.abs(somaParcelas - (job.valor_fechado ?? 0)))}.
+                </Aviso>
+              </div>
+            )}
+          </Painel>
+
           <Painel titulo={`Links · ${links.length}`}>
             {links.length === 0 && (
               <p className="campo__dica">

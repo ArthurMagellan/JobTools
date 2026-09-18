@@ -249,3 +249,38 @@ export function Modal({
   );
 }
 
+
+// ---------------------------------------------------------------- indicador
+
+/**
+ * Bloco de número do topo. Só existe onde o número É o assunto da tela —
+ * no financeiro. Espalhar isso por todo lugar achata a hierarquia.
+ */
+export function Indicador({
+  rotulo,
+  valor,
+  apoio,
+  tom = "neutro",
+  icone,
+}: {
+  rotulo: string;
+  valor: string;
+  apoio?: ReactNode;
+  tom?: "neutro" | "acento" | "ok" | "atencao" | "perigo";
+  icone?: string;
+}) {
+  return (
+    <article className={`indicador ${tom !== "neutro" ? `indicador--${tom}` : ""}`}>
+      {icone && (
+        <span className="indicador__icone" aria-hidden="true">
+          {icone}
+        </span>
+      )}
+      <div className="indicador__corpo">
+        <span className="indicador__valor mono">{valor}</span>
+        <span className="indicador__rotulo">{rotulo}</span>
+        {apoio && <span className="indicador__apoio">{apoio}</span>}
+      </div>
+    </article>
+  );
+}

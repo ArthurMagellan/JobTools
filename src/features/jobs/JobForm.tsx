@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { adicionarData, atualizarJob, criarJob } from "../../data/jobs";
-import type { Cliente, Job, JobCompleto, TipoJob } from "../../data/types";
+import { listarContratos } from "../../data/financeiro";
+import { ROTULO_COBRANCA, type Cliente, type ContratoCompleto, type FormaCobranca, type Job, type JobCompleto, type TipoJob } from "../../data/types";
 import { Area, Aviso, Botao, Campo, Marcacao, Modal, Selecao } from "../../components/ui";
 import { ModalCliente } from "../clientes/ClienteForm";
 
@@ -13,6 +14,8 @@ type Rascunho = {
   escopo_tratamento: boolean;
   prazo_entrega: string;
   valor_fechado: string;
+  forma_cobranca: FormaCobranca;
+  contrato_id: string;
   local: string;
   briefing: string;
   primeira_data: string;
@@ -27,6 +30,8 @@ const VAZIO: Rascunho = {
   escopo_tratamento: false,
   prazo_entrega: "",
   valor_fechado: "",
+  forma_cobranca: "avulso",
+  contrato_id: "",
   local: "",
   briefing: "",
   primeira_data: "",
@@ -51,10 +56,12 @@ export function ModalJob({
   const [erro, setErro] = useState<string | null>(null);
   const [salvando, setSalvando] = useState(false);
   const [criandoCliente, setCriandoCliente] = useState(false);
+  const [contratos, setContratos] = useState<ContratoCompleto[]>([]);
 
   useEffect(() => {
     if (!aberto) return;
     setErro(null);
+    void listarContratos().then(setContratos).catch(() => undefined);
     if (job) {
       setR({
         titulo: job.titulo,
@@ -65,6 +72,8 @@ export function ModalJob({
         escopo_tratamento: job.escopo_tratamento,
         prazo_entrega: job.prazo_entrega ?? "",
         valor_fechado: job.valor_fechado === null ? "" : String(job.valor_fechado),
+        forma_cobranca: job.forma_cobranca,
+        contrato_id: job.contrato_id ?? "",
         local: job.local ?? "",
         briefing: job.briefing ?? "",
         primeira_data: "",
@@ -77,6 +86,14 @@ export function ModalJob({
   function mudar<K extends keyof Rascunho>(campo: K, valor: Rascunho[K]) {
     setR((atual) => ({ ...atual, [campo]: valor }));
   }
+
+  /** Só contratos do cliente escolhido — vincular ao contrato de outro seria erro. */
+  const contratosDoCliente = useMemo(
+    () => contratos.filter((c) => c.cliente_id === r.cliente_id),
+    [contratos, r.cliente_id]
+  );
+
+  const incluso = r.forma_cobranca === "incluso";
 
   async function salvar() {
     if (!r.titulo.trim()) return setErro("Dê um título ao job.");
@@ -93,7 +110,10 @@ export function ModalJob({
       escopo_edicao: r.escopo_edicao,
       escopo_tratamento: r.escopo_tratamento,
       prazo_entrega: r.prazo_entrega || null,
-      valor_fechado: r.valor_fechado === "" ? null : Number(r.valor_fechado),
+      forma_cobranca: r.forma_cobranca,
+      contrato_id: r.forma_cobranca === "avulso" ? null : r.contrato_id || null,
+      valor_fechado:
+        r.forma_cobranca === "incluso" || r.valor_fechado === "" ? null : Number(r.valor_fechado),
       local: r.local,
       briefing: r.briefing,
     };
@@ -220,16 +240,48 @@ export function ModalJob({
             />
           )}
 
+          <Selecao
+            rotulo="Cobrança"
+            value={r.forma_cobranca}
+            onChange={(e) => mudar("forma_cobranca", e.target.value as FormaCobranca)}
+          >
+            {(Object.keys(ROTULO_COBRANCA) as FormaCobranca[]).map((f) => (
+              <option key={f} value={f}>
+                {ROTULO_COBRANCA[f]}
+              </option>
+            ))}
+          </Selecao>
+
+          {r.forma_cobranca !== "avulso" && (
+            <Selecao
+              rotulo="Contrato"
+              value={r.contrato_id}
+              onChange={(e) => mudar("contrato_id", e.target.value)}
+            >
+              <option value="">Escolha o contrato</option>
+              {contratosDoCliente.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.descricao}
+                </option>
+              ))}
+            </Selecao>
+          )}
+
           <Campo
             rotulo="Cachê"
             opcional
             type="number"
             min={0}
             step="0.01"
-            value={r.valor_fechado}
+            value={incluso ? "" : r.valor_fechado}
+            disabled={incluso}
             onChange={(e) => mudar("valor_fechado", e.target.value)}
-            placeholder="3000"
-            dica="Valor fechado do job. Quando e como esse dinheiro entra é assunto da fase 3."
+            placeholder={incluso ? "já está na mensalidade" : "3000"}
+            dica={
+              incluso
+                ? "Job incluso no contrato não tem valor próprio — somar os dois contaria o mesmo dinheiro duas vezes."
+                : "Valor fechado do job. As parcelas somam contra ele."
+            }
           />
 
           <Campo

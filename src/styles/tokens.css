@@ -2,38 +2,44 @@
    JobTools — tokens de design
    ----------------------------------------------------------------------------
    Este é o ÚNICO arquivo onde cor, espaçamento, tipografia e raio são definidos.
-   Nenhum componente escreve um hex ou um pixel solto. Trocar a identidade visual
-   do sistema inteiro, um dia, é trocar os valores daqui.
+   Nenhum componente escreve um hex ou um pixel solto.
+
+   Duas camadas de fundo, e a distinção importa: --cor-pagina é o escuro atrás
+   de tudo; --cor-fundo é o interior da casca do app, que flutua sobre ele.
+   É o que dá a sensação de aplicativo em vez de página.
    ============================================================================ */
 
 :root {
-  /* --- neutros: cinza com viés frio, escolhido e não herdado --- */
-  --cor-fundo: #f4f6f6;
+  /* --- neutros: cinza com viés violeta, escolhido e não herdado --- */
+  --cor-pagina: #e7e7ee;
+  --cor-fundo: #f6f6fa;
   --cor-superficie: #ffffff;
-  --cor-afundado: #ebefef;
-  --cor-texto: #141e1d;
-  --cor-texto-medio: #41514f;
-  --cor-texto-suave: #6b7c7a;
-  --cor-linha: #d8e0df;
-  --cor-linha-suave: #e5ebea;
+  --cor-afundado: #efeff4;
+  --cor-texto: #16151d;
+  --cor-texto-medio: #46445a;
+  --cor-texto-suave: #6f6d84;
+  --cor-linha: #dcdbe6;
+  --cor-linha-suave: #e9e8f0;
 
-  /* --- acento: petróleo --- */
-  --cor-acento: #0b6e68;
-  --cor-acento-forte: #075450;
-  --cor-acento-lavado: #e0eeec;
+  /* --- acento: violeta --- */
+  --cor-acento: #5b3df5;
+  --cor-acento-forte: #4a2fd4;
+  --cor-acento-lavado: #ece8fe;
   --cor-acento-contraste: #ffffff;
+  --cor-acento-brilho: rgba(91, 61, 245, 0.22);
+  --cor-veu: rgba(22, 21, 29, 0.45);
 
   /* --- semânticas: separadas do acento, usadas só para estado --- */
-  --cor-ok: #3a7d44;
-  --cor-ok-lavado: #e5f0e6;
-  --cor-atencao: #9a6b14;
-  --cor-atencao-lavado: #f5ebd9;
-  --cor-perigo: #ae3d2c;
-  --cor-perigo-lavado: #f6e5e1;
+  --cor-ok: #2f8a52;
+  --cor-ok-lavado: #e3f2e8;
+  --cor-atencao: #9a6a12;
+  --cor-atencao-lavado: #f7edda;
+  --cor-perigo: #c03f34;
+  --cor-perigo-lavado: #fae5e2;
 
   /* --- compromisso macio: dessaturado de propósito (regra R2) --- */
-  --cor-macio: #6f7e8c;
-  --cor-macio-lavado: #e8ecef;
+  --cor-macio: #6e7183;
+  --cor-macio-lavado: #eaeaef;
 
   /* --- tipografia --- */
   --fonte-titulo: "Familjen Grotesk", "Segoe UI", system-ui, sans-serif;
@@ -58,76 +64,87 @@
   --esp-7: 48px;
 
   /* --- forma --- */
-  --raio-sm: 3px;
-  --raio-md: 5px;
-  --raio-lg: 8px;
-  --sombra-sm: 0 1px 2px rgba(20, 30, 29, 0.06);
-  --sombra-md: 0 2px 8px rgba(20, 30, 29, 0.1);
-  --sombra-lg: 0 8px 28px rgba(20, 30, 29, 0.16);
+  --raio-sm: 4px;
+  --raio-md: 8px;
+  --raio-lg: 12px;
+  --raio-xl: 18px;
+  --sombra-sm: 0 1px 2px rgba(22, 21, 29, 0.06);
+  --sombra-md: 0 2px 10px rgba(22, 21, 29, 0.09);
+  --sombra-lg: 0 14px 44px rgba(22, 21, 29, 0.18);
+  --sombra-casca: 0 20px 60px rgba(22, 21, 29, 0.12);
 
   /* --- layout --- */
-  --largura-menu: 210px;
+  --largura-menu: 218px;
   --altura-menu-celular: 58px;
+  --altura-barra: 54px;
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-tema="claro"]) {
-    --cor-fundo: #0f1817;
-    --cor-superficie: #15201f;
-    --cor-afundado: #1b2726;
-    --cor-texto: #e7edec;
-    --cor-texto-medio: #b3c1bf;
-    --cor-texto-suave: #879796;
-    --cor-linha: #2a3735;
-    --cor-linha-suave: #223330;
+    --cor-pagina: #08080c;
+    --cor-fundo: #100f16;
+    --cor-superficie: #191823;
+    --cor-afundado: #201f2c;
+    --cor-texto: #eceaf4;
+    --cor-texto-medio: #b6b3c6;
+    --cor-texto-suave: #8a87a0;
+    --cor-linha: #2c2a3a;
+    --cor-linha-suave: #23222f;
 
-    --cor-acento: #59b6ad;
-    --cor-acento-forte: #7ecbc3;
-    --cor-acento-lavado: #123331;
-    --cor-acento-contraste: #0f1817;
+    --cor-acento: #7c5cff;
+    --cor-acento-forte: #9d84ff;
+    --cor-acento-lavado: #241d42;
+    --cor-acento-contraste: #ffffff;
+    --cor-acento-brilho: rgba(124, 92, 255, 0.3);
+    --cor-veu: rgba(4, 4, 7, 0.68);
 
-    --cor-ok: #6fb97a;
-    --cor-ok-lavado: #162e1c;
-    --cor-atencao: #d2a455;
-    --cor-atencao-lavado: #33270f;
-    --cor-perigo: #e0745f;
-    --cor-perigo-lavado: #35201b;
+    --cor-ok: #5cc07f;
+    --cor-ok-lavado: #16301f;
+    --cor-atencao: #d8a94f;
+    --cor-atencao-lavado: #332711;
+    --cor-perigo: #ea7264;
+    --cor-perigo-lavado: #38201d;
 
-    --cor-macio: #93a3b1;
-    --cor-macio-lavado: #1e2a31;
+    --cor-macio: #9b9db2;
+    --cor-macio-lavado: #212030;
 
-    --sombra-sm: 0 1px 2px rgba(0, 0, 0, 0.32);
-    --sombra-md: 0 2px 8px rgba(0, 0, 0, 0.4);
-    --sombra-lg: 0 8px 28px rgba(0, 0, 0, 0.5);
+    --sombra-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+    --sombra-md: 0 2px 10px rgba(0, 0, 0, 0.45);
+    --sombra-lg: 0 14px 44px rgba(0, 0, 0, 0.6);
+    --sombra-casca: 0 20px 60px rgba(0, 0, 0, 0.5);
   }
 }
 
 :root[data-tema="escuro"] {
-  --cor-fundo: #0f1817;
-  --cor-superficie: #15201f;
-  --cor-afundado: #1b2726;
-  --cor-texto: #e7edec;
-  --cor-texto-medio: #b3c1bf;
-  --cor-texto-suave: #879796;
-  --cor-linha: #2a3735;
-  --cor-linha-suave: #223330;
+  --cor-pagina: #08080c;
+  --cor-fundo: #100f16;
+  --cor-superficie: #191823;
+  --cor-afundado: #201f2c;
+  --cor-texto: #eceaf4;
+  --cor-texto-medio: #b6b3c6;
+  --cor-texto-suave: #8a87a0;
+  --cor-linha: #2c2a3a;
+  --cor-linha-suave: #23222f;
 
-  --cor-acento: #59b6ad;
-  --cor-acento-forte: #7ecbc3;
-  --cor-acento-lavado: #123331;
-  --cor-acento-contraste: #0f1817;
+  --cor-acento: #7c5cff;
+  --cor-acento-forte: #9d84ff;
+  --cor-acento-lavado: #241d42;
+  --cor-acento-contraste: #ffffff;
+  --cor-acento-brilho: rgba(124, 92, 255, 0.3);
+  --cor-veu: rgba(4, 4, 7, 0.68);
 
-  --cor-ok: #6fb97a;
-  --cor-ok-lavado: #162e1c;
-  --cor-atencao: #d2a455;
-  --cor-atencao-lavado: #33270f;
-  --cor-perigo: #e0745f;
-  --cor-perigo-lavado: #35201b;
+  --cor-ok: #5cc07f;
+  --cor-ok-lavado: #16301f;
+  --cor-atencao: #d8a94f;
+  --cor-atencao-lavado: #332711;
+  --cor-perigo: #ea7264;
+  --cor-perigo-lavado: #38201d;
 
-  --cor-macio: #93a3b1;
-  --cor-macio-lavado: #1e2a31;
+  --cor-macio: #9b9db2;
+  --cor-macio-lavado: #212030;
 
-  --sombra-sm: 0 1px 2px rgba(0, 0, 0, 0.32);
-  --sombra-md: 0 2px 8px rgba(0, 0, 0, 0.4);
-  --sombra-lg: 0 8px 28px rgba(0, 0, 0, 0.5);
+  --sombra-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --sombra-md: 0 2px 10px rgba(0, 0, 0, 0.45);
+  --sombra-lg: 0 14px 44px rgba(0, 0, 0, 0.6);
+  --sombra-casca: 0 20px 60px rgba(0, 0, 0, 0.5);
 }

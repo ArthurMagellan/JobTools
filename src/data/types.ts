@@ -128,6 +128,7 @@ export interface Job {
   prazo_entrega: string | null;
   status: Status;
   forma_cobranca: FormaCobranca;
+  contrato_id: string | null;
   valor_fechado: number | null;
   equipe: string | null;
   briefing: string | null;
@@ -238,8 +239,15 @@ export const FIRMEZA_DA_CAMADA: Record<CamadaAgenda, Firmeza> = {
   captacao: "dura",
   entrega: "dura",
   edicao: "macia",
-  pagamento: "dura",
+  // Pagamento nao ocupa o seu tempo: e informacao, nao compromisso.
+  pagamento: "macia",
 };
+
+/**
+ * As camadas que disputam a sua agenda. Pagamento fica de fora: dinheiro caindo
+ * no mesmo dia de uma captacao nao e conflito de nada.
+ */
+export const CAMADAS_DE_TEMPO: CamadaAgenda[] = ["captacao", "entrega", "edicao"];
 
 /** Um item desenhado no calendário, venha ele de onde vier. */
 export interface EventoAgenda {
@@ -252,4 +260,98 @@ export interface EventoAgenda {
   hora: string | null;
   jobId: string | null;
   compromissoId: string | null;
+}
+
+// ============================================================================
+// FINANCEIRO (fase 3)
+// ============================================================================
+
+export type StatusContrato = "ativo" | "pausado" | "encerrado";
+export type Confianca = "estimada" | "confirmada" | "paga";
+export type FormaPagamento = "pix" | "boleto" | "transferencia" | "dinheiro" | "outro";
+
+export const ROTULO_CONTRATO: Record<StatusContrato, string> = {
+  ativo: "Ativo",
+  pausado: "Pausado",
+  encerrado: "Encerrado",
+};
+
+export const ROTULO_CONFIANCA: Record<Confianca, string> = {
+  estimada: "Estimada",
+  confirmada: "Confirmada",
+  paga: "Paga",
+};
+
+/** O que cada estágio quer dizer, para a interface não precisar explicar. */
+export const AJUDA_CONFIANCA: Record<Confianca, string> = {
+  estimada: "Data calculada pelo prazo padrão do cliente. Ainda é palpite.",
+  confirmada: "O financeiro do cliente avisou a data. Dinheiro quase certo.",
+  paga: "Caiu na conta.",
+};
+
+export const ROTULO_FORMA: Record<FormaPagamento, string> = {
+  pix: "PIX",
+  boleto: "Boleto",
+  transferencia: "Transferência",
+  dinheiro: "Dinheiro",
+  outro: "Outro",
+};
+
+export interface Contrato {
+  id: string;
+  cliente_id: string;
+  descricao: string;
+  valor_mensal: number;
+  dia_vencimento: number;
+  data_inicio: string;
+  data_fim: string | null;
+  escopo_incluso: string | null;
+  status: StatusContrato;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ContratoCompleto extends Contrato {
+  cliente: Pick<Cliente, "id" | "nome"> | null;
+}
+
+export interface Parcela {
+  id: string;
+  job_id: string | null;
+  contrato_id: string | null;
+  competencia: string | null;
+  descricao: string | null;
+  valor: number;
+  data_prevista: string;
+  confianca: Confianca;
+  data_efetiva: string | null;
+  forma: FormaPagamento | null;
+  nota: string | null;
+  nf_emitida: boolean;
+  nf_numero: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ParcelaCompleta extends Parcela {
+  job: { id: string; titulo: string; cliente: { nome: string } | null } | null;
+  contrato: { id: string; descricao: string; cliente: { nome: string } | null } | null;
+}
+
+/**
+ * As contas do mês. São quatro números porque "faturamento" significa quatro
+ * coisas diferentes, e confundi-las é a fonte mais comum de decisão errada.
+ */
+export interface ResumoDoMes {
+  recebido: number;
+  aReceberConfirmado: number;
+  aReceberEstimado: number;
+  atrasado: number;
+  garantido: number;
+}
+
+export interface MesPrevisto {
+  competencia: string;
+  confirmado: number;
+  estimado: number;
 }

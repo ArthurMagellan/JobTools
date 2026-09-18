@@ -10,6 +10,7 @@ import { ClientesPage } from "./features/clientes/ClientesPage";
 import { ClientePage } from "./features/clientes/ClientePage";
 import { JobPage } from "./features/jobs/JobPage";
 import { CalendarioPage } from "./features/calendario/CalendarioPage";
+import { FinanceiroPage } from "./features/financeiro/FinanceiroPage";
 
 export default function App() {
   const [sessao, setSessao] = useState<Session | null>(null);
@@ -38,6 +39,7 @@ export default function App() {
           <Route index element={<Navigate to="/quadro" replace />} />
           <Route path="/quadro" element={<QuadroPage />} />
           <Route path="/calendario" element={<CalendarioPage />} />
+          <Route path="/financeiro" element={<FinanceiroPage />} />
           <Route path="/clientes" element={<ClientesPage />} />
           <Route path="/clientes/:id" element={<ClientePage />} />
           <Route path="/jobs/:id" element={<JobPage />} />

@@ -238,7 +238,6 @@ function Legenda() {
         <li key={c}>
           <span className={`cal__ponto cal__ponto--${c}`} aria-hidden="true" />
           {ROTULO_CAMADA[c]}
-          {c === "pagamento" && <span className="cal__futuro">fase 3</span>}
           {c === "edicao" && <span className="cal__futuro cal__futuro--macio">remarcável</span>}
         </li>
       ))}

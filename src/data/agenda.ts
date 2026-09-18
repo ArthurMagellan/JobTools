@@ -1,6 +1,7 @@
 import { supabase } from "../lib/supabase";
 import { limpo, traduzErro } from "./base";
 import {
+  CAMADAS_DE_TEMPO,
   FIRMEZA_DA_CAMADA,
   ROTULO_COMPROMISSO,
   STATUS_FORA,
@@ -101,15 +102,13 @@ function horaDoCompromisso(c: Compromisso): string | null {
 }
 
 /**
- * Junta as camadas do calendário numa lista só de eventos, já expandida por dia.
- *
- * Pagamento não entra: as parcelas são fase 3. A camada existe na legenda,
- * vazia — é mais honesto do que fingir que o calendário sabe de dinheiro.
+ * Junta as quatro camadas do calendário numa lista só de eventos, já expandida
+ * por dia: captações, prazos de entrega, reservas de tempo e vencimentos.
  */
 export async function eventosDoPeriodo(de: string, ate: string): Promise<EventoAgenda[]> {
   const fora = `(${STATUS_FORA.join(",")})`;
 
-  const [captacoes, entregas, compromissos] = await Promise.all([
+  const [captacoes, entregas, compromissos, parcelas] = await Promise.all([
     supabase
       .from("job_datas")
       .select("id, data, hora_chamada, observacao, job:jobs!inner(id, titulo, status, cliente:clientes(nome))")
@@ -125,10 +124,19 @@ export async function eventosDoPeriodo(de: string, ate: string): Promise<EventoA
       .not("status", "in", fora),
 
     listarCompromissos(de, ate),
+
+    supabase
+      .from("parcelas")
+      .select(
+        "id, valor, data_prevista, confianca, job:jobs(id, titulo), contrato:contratos(descricao)"
+      )
+      .gte("data_prevista", de)
+      .lte("data_prevista", ate),
   ]);
 
   if (captacoes.error) throw traduzErro(captacoes.error, "carregar as captações");
   if (entregas.error) throw traduzErro(entregas.error, "carregar os prazos");
+  if (parcelas.error) throw traduzErro(parcelas.error, "carregar os vencimentos");
 
   const eventos: EventoAgenda[] = [];
 
@@ -179,6 +187,26 @@ export async function eventosDoPeriodo(de: string, ate: string): Promise<EventoA
     }
   }
 
+  for (const p of parcelas.data ?? []) {
+    const job = p.job as unknown as { id: string; titulo: string } | null;
+    const contrato = p.contrato as unknown as { descricao: string } | null;
+    eventos.push({
+      chave: `pag-${p.id}`,
+      camada: "pagamento",
+      firmeza: "macia",
+      data: p.data_prevista as string,
+      titulo: job?.titulo ?? contrato?.descricao ?? "Parcela",
+      detalhe: Number(p.valor).toLocaleString("pt-BR", {
+        style: "currency",
+        currency: "BRL",
+        maximumFractionDigits: 0,
+      }),
+      hora: null,
+      jobId: job?.id ?? null,
+      compromissoId: null,
+    });
+  }
+
   return eventos.sort((a, b) => a.data.localeCompare(b.data) || a.camada.localeCompare(b.camada));
 }
 
@@ -205,8 +233,10 @@ export function conflitosDoDia(
   eventosDoDia: EventoAgenda[],
   firmezaDoNovo: Firmeza = "dura"
 ): Conflito | null {
-  const duros = eventosDoDia.filter((e) => e.firmeza === "dura");
-  const macios = eventosDoDia.filter((e) => e.firmeza === "macia");
+  // Pagamento nao disputa agenda: vencimento no mesmo dia de captacao nao e conflito.
+  const doTempo = eventosDoDia.filter((e) => CAMADAS_DE_TEMPO.includes(e.camada));
+  const duros = doTempo.filter((e) => e.firmeza === "dura");
+  const macios = doTempo.filter((e) => e.firmeza === "macia");
 
   if (firmezaDoNovo === "dura" && duros.length > 0) {
     return {
@@ -242,6 +272,7 @@ export function conflitosDoDia(
 export function diasEmConflito(eventos: EventoAgenda[]): Set<string> {
   const conta = new Map<string, number>();
   for (const e of eventos) {
+    if (!CAMADAS_DE_TEMPO.includes(e.camada)) continue;
     if (FIRMEZA_DA_CAMADA[e.camada] !== "dura") continue;
     conta.set(e.data, (conta.get(e.data) ?? 0) + 1);
   }

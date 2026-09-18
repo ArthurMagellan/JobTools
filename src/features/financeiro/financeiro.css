@@ -1,0 +1,242 @@
+.fin__navegacao {
+  display: flex;
+  gap: var(--esp-1);
+}
+
+.fin__nota {
+  font-size: var(--texto-sm);
+  color: var(--cor-texto-suave);
+  max-width: 72ch;
+  margin: calc(var(--esp-2) * -1) 0 var(--esp-5);
+  line-height: 1.55;
+}
+
+.fin {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--esp-4);
+  align-items: start;
+}
+
+@media (min-width: 980px) {
+  .fin {
+    grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+  }
+}
+
+.fin__contrato-nome {
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fin__contrato-valor {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* --- gráfico de previsão --- */
+.grafico {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  gap: var(--esp-2);
+  align-items: end;
+  height: 188px;
+  padding-top: var(--esp-3);
+}
+
+.grafico__col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--esp-2);
+  height: 100%;
+  min-width: 0;
+}
+
+.grafico__valor {
+  font-size: 10px;
+  color: var(--cor-texto-suave);
+  white-space: nowrap;
+  height: 14px;
+}
+
+.grafico__pilha {
+  display: flex;
+  flex-direction: column-reverse;
+  justify-content: flex-start;
+  width: 100%;
+  max-width: 46px;
+  flex: 1;
+  border-radius: var(--raio-sm);
+  overflow: hidden;
+  background: var(--cor-afundado);
+}
+
+.grafico__barra {
+  width: 100%;
+  min-height: 0;
+  transition: height 0.2s;
+}
+
+.grafico__barra--confirmado {
+  background: var(--cor-acento);
+}
+
+/* Estimado é listrado: a textura diz "ainda é palpite" antes de você ler a legenda. */
+.grafico__barra--estimado {
+  background: repeating-linear-gradient(
+    45deg,
+    var(--cor-acento-lavado),
+    var(--cor-acento-lavado) 4px,
+    transparent 4px,
+    transparent 8px
+  );
+  border-top: 1px dashed var(--cor-acento);
+}
+
+.grafico__mes {
+  font-size: var(--texto-xs);
+  color: var(--cor-texto-suave);
+}
+
+.grafico__legenda {
+  display: flex;
+  gap: var(--esp-4);
+  margin-top: var(--esp-3);
+  padding-top: var(--esp-3);
+  border-top: 1px solid var(--cor-linha-suave);
+  font-size: var(--texto-sm);
+  color: var(--cor-texto-suave);
+}
+
+.grafico__legenda span {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-2);
+}
+
+.grafico__amostra {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  display: inline-block;
+}
+
+.grafico__amostra--confirmado {
+  background: var(--cor-acento);
+}
+
+.grafico__amostra--estimado {
+  background: repeating-linear-gradient(
+    45deg,
+    var(--cor-acento-lavado),
+    var(--cor-acento-lavado) 3px,
+    transparent 3px,
+    transparent 6px
+  );
+  border: 1px dashed var(--cor-acento);
+}
+
+/* --- lista de parcelas --- */
+.parcelas {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.parcela {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--esp-2) var(--esp-3);
+  align-items: center;
+  padding: var(--esp-3) 0 var(--esp-3) var(--esp-3);
+  border-bottom: 1px solid var(--cor-linha-suave);
+}
+
+.parcela:last-child {
+  border-bottom: none;
+}
+
+/* Trilho de estado na borda esquerda: a situação se lê antes do texto. */
+.parcela__trilho {
+  position: absolute;
+  left: 0;
+  top: var(--esp-2);
+  bottom: var(--esp-2);
+  width: 3px;
+  border-radius: 2px;
+}
+
+.parcela__trilho--paga {
+  background: var(--cor-ok);
+}
+.parcela__trilho--confirmada {
+  background: var(--cor-acento);
+}
+.parcela__trilho--estimada {
+  background: var(--cor-atencao);
+}
+.parcela__trilho--atrasada {
+  background: var(--cor-perigo);
+}
+
+.parcela__corpo {
+  min-width: 0;
+}
+
+.parcela__nome {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-2);
+  flex-wrap: wrap;
+  font-weight: 500;
+  font-size: var(--texto-md);
+}
+
+.parcela__sub {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-1);
+  flex-wrap: wrap;
+  font-size: var(--texto-sm);
+  color: var(--cor-texto-suave);
+  margin-top: 2px;
+}
+
+.parcela__direita {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-2);
+  justify-self: end;
+}
+
+.parcela__valor {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.parcela__acoes {
+  grid-column: 1 / -1;
+  display: flex;
+  gap: var(--esp-1);
+  justify-content: flex-end;
+}
+
+@media (min-width: 760px) {
+  .parcela {
+    grid-template-columns: minmax(0, 1fr) auto auto;
+  }
+  .parcela__acoes {
+    grid-column: auto;
+  }
+}
