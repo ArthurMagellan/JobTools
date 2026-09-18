@@ -20,7 +20,7 @@ import {
   type JobCompleto,
   type Status,
 } from "../../data/types";
-import { dataCurta, diasAte, prazoEmPalavras } from "../../lib/formato";
+import { dataCurta, diasAte, moedaCurta, prazoEmPalavras } from "../../lib/formato";
 import { Aviso, Botao, Carregando, Etiqueta } from "../../components/ui";
 import { ModalJob } from "../jobs/JobForm";
 import "./quadro.css";
@@ -219,6 +219,11 @@ function Cartao({ job, aoAbrir }: { job: JobCompleto; aoAbrir: (id: string) => v
         {job.escopo_captacao && <Etiqueta title="Captação">📹</Etiqueta>}
         {job.escopo_edicao && <Etiqueta title="Edição">✂️</Etiqueta>}
         {job.escopo_tratamento && <Etiqueta title="Tratamento de foto">◑</Etiqueta>}
+        {job.valor_fechado !== null && (
+          <span className="cartao__cache mono" title="Cachê fechado">
+            {moedaCurta(job.valor_fechado)}
+          </span>
+        )}
       </div>
 
       <footer className="cartao__rodape">

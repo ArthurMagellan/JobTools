@@ -12,6 +12,7 @@ type Rascunho = {
   escopo_edicao: boolean;
   escopo_tratamento: boolean;
   prazo_entrega: string;
+  valor_fechado: string;
   local: string;
   briefing: string;
   primeira_data: string;
@@ -25,6 +26,7 @@ const VAZIO: Rascunho = {
   escopo_edicao: true,
   escopo_tratamento: false,
   prazo_entrega: "",
+  valor_fechado: "",
   local: "",
   briefing: "",
   primeira_data: "",
@@ -62,6 +64,7 @@ export function ModalJob({
         escopo_edicao: job.escopo_edicao,
         escopo_tratamento: job.escopo_tratamento,
         prazo_entrega: job.prazo_entrega ?? "",
+        valor_fechado: job.valor_fechado === null ? "" : String(job.valor_fechado),
         local: job.local ?? "",
         briefing: job.briefing ?? "",
         primeira_data: "",
@@ -90,6 +93,7 @@ export function ModalJob({
       escopo_edicao: r.escopo_edicao,
       escopo_tratamento: r.escopo_tratamento,
       prazo_entrega: r.prazo_entrega || null,
+      valor_fechado: r.valor_fechado === "" ? null : Number(r.valor_fechado),
       local: r.local,
       briefing: r.briefing,
     };
@@ -215,6 +219,18 @@ export function ModalJob({
               dica="Dá para somar outras diárias depois, dentro do job."
             />
           )}
+
+          <Campo
+            rotulo="Cachê"
+            opcional
+            type="number"
+            min={0}
+            step="0.01"
+            value={r.valor_fechado}
+            onChange={(e) => mudar("valor_fechado", e.target.value)}
+            placeholder="3000"
+            dica="Valor fechado do job. Quando e como esse dinheiro entra é assunto da fase 3."
+          />
 
           <Campo
             rotulo="Local"

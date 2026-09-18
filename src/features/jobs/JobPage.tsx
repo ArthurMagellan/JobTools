@@ -24,7 +24,7 @@ import {
   type Status,
   type TipoLink,
 } from "../../data/types";
-import { dataCompleta, horaCurta, quandoRelativo } from "../../lib/formato";
+import { dataCompleta, horaCurta, moeda, quandoRelativo } from "../../lib/formato";
 import { Area, Aviso, Botao, Campo, Carregando, Etiqueta, Modal, Painel, Selecao } from "../../components/ui";
 import { ModalJob } from "./JobForm";
 import "./job.css";
@@ -186,6 +186,10 @@ export function JobPage() {
               <div>
                 <dt>Local</dt>
                 <dd>{job.local || "—"}</dd>
+              </div>
+              <div>
+                <dt>Cachê</dt>
+                <dd className="job__cache">{moeda(job.valor_fechado)}</dd>
               </div>
               <div>
                 <dt>Cobrança</dt>

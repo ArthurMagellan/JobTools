@@ -141,3 +141,10 @@
   font-size: var(--texto-xs);
   color: var(--cor-texto-suave);
 }
+
+.cartao__cache {
+  margin-left: auto;
+  font-size: var(--texto-xs);
+  font-weight: 500;
+  color: var(--cor-texto-medio);
+}

@@ -79,3 +79,8 @@
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
+
+.job__cache {
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+}

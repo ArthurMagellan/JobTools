@@ -58,3 +58,24 @@ export function quandoRelativo(isoComHora: string): string {
   if (dias < 0) return `há ${Math.abs(dias)} dias`;
   return dataCurta(isoComHora);
 }
+
+/** Cachê em reais. Nulo vira travessão — job sem valor não é job de valor zero. */
+export function moeda(valor: number | null): string {
+  if (valor === null || valor === undefined) return "—";
+  return valor.toLocaleString("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+    minimumFractionDigits: 2,
+  });
+}
+
+/** Versão curta para o cartão do quadro: R$ 3,5 mil em vez de R$ 3.000,00. */
+export function moedaCurta(valor: number | null): string {
+  if (valor === null || valor === undefined) return "";
+  if (valor >= 1000) {
+    const mil = valor / 1000;
+    const texto = Number.isInteger(mil) ? String(mil) : mil.toFixed(1).replace(".", ",");
+    return `R$ ${texto} mil`;
+  }
+  return `R$ ${valor.toLocaleString("pt-BR", { maximumFractionDigits: 0 })}`;
+}

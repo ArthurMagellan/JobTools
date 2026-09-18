@@ -128,6 +128,7 @@ export interface Job {
   prazo_entrega: string | null;
   status: Status;
   forma_cobranca: FormaCobranca;
+  valor_fechado: number | null;
   equipe: string | null;
   briefing: string | null;
   motivo_saida: string | null;

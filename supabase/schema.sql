@@ -87,6 +87,11 @@ create table if not exists public.jobs (
   forma_cobranca     text not null default 'avulso'
                      check (forma_cobranca in ('avulso','incluso','extra')),
 
+  -- O cachê. As parcelas da fase 3 somam contra este número; um job
+  -- "incluso no contrato" fica nulo, porque o dinheiro dele já está
+  -- na mensalidade e somar os dois contaria duas vezes (regra R1).
+  valor_fechado      numeric(10,2) check (valor_fechado >= 0),
+
   equipe             text,
   briefing           text,
 
@@ -139,6 +144,14 @@ create table if not exists public.links (
   validade    date,
   created_at  timestamptz not null default now()
 );
+
+-- ============================================================================
+-- MIGRAÇÕES
+-- Para bancos criados antes de uma coluna existir. O bloco acima cobre bancos
+-- novos; este cobre o seu, que já tem dados. Rodar de novo não faz nada.
+-- ============================================================================
+alter table public.jobs
+  add column if not exists valor_fechado numeric(10,2);
 
 -- ----------------------------------------------------------------------------
 -- Índices
