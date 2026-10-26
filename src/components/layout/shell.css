@@ -331,3 +331,41 @@ body {
   align-items: center;
   gap: var(--esp-2);
 }
+
+/* Exportar fica na barra de cima: é ação global, não de uma tela só. */
+.barra__exportar {
+  padding: 6px 12px;
+  border-radius: var(--raio-md);
+  border: 1px solid var(--cor-linha);
+  background: var(--cor-superficie);
+  color: var(--cor-texto-medio);
+  font-size: var(--texto-sm);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.barra__exportar:hover:not(:disabled) {
+  border-color: var(--cor-acento);
+  color: var(--cor-acento-forte);
+}
+
+.barra__exportar:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+
+/* Cobrança discreta, não alarme: lembra sem atrapalhar o trabalho. */
+.barra__cobranca {
+  font-size: var(--texto-xs);
+  color: var(--cor-atencao);
+  border: 1px dashed var(--cor-atencao);
+  border-radius: var(--raio-sm);
+  padding: 3px 8px;
+  white-space: nowrap;
+}
+
+@media (max-width: 700px) {
+  .barra__cobranca {
+    display: none;
+  }
+}
